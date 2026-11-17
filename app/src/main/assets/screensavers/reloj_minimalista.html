@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reloj Minimalista OLED</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      width: 100%; height: 100%;
+      background-color: #000000;
+      color: #FFFFFF;
+      overflow: hidden;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #clock-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: transform 3s ease-in-out;
+      will-change: transform;
+      user-select: none;
+    }
+    #time {
+      font-size: 8rem;
+      font-weight: 200;
+      letter-spacing: -2px;
+      line-height: 1;
+      color: #F8FAFC;
+      text-shadow: 0 4px 24px rgba(0,0,0,0.8);
+    }
+    #date {
+      font-size: 1.75rem;
+      font-weight: 300;
+      letter-spacing: 0.5px;
+      color: #94A3B8;
+      margin-top: 14px;
+      text-transform: capitalize;
+    }
+  </style>
+</head>
+<body>
+  <div id="clock-container">
+    <div id="time">00:00</div>
+    <div id="date">Lunes, 1 de Enero</div>
+  </div>
+
+  <script>
+    const timeEl = document.getElementById('time');
+    const dateEl = document.getElementById('date');
+    const container = document.getElementById('clock-container');
+
+    function updateClock() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      timeEl.textContent = `${h}:${m}`;
+
+      const options = { weekday: 'long', day: 'numeric', month: 'long' };
+      const userLang = (navigator.languages && navigator.languages[0]) || navigator.language || 'en-US';
+      let dateStr = now.toLocaleDateString(userLang, options);
+      if (dateStr) {
+        dateStr = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+      }
+      dateEl.textContent = dateStr;
+    }
+
+    // Anti-burn-in shift every 60 seconds (OLED protection)
+    function shiftBurnIn() {
+      const maxShift = 24; // pixels
+      const x = (Math.random() * 2 - 1) * maxShift;
+      const y = (Math.random() * 2 - 1) * maxShift;
+      container.style.transform = `translate(${x}px, ${y}px)`;
+    }
+
+    updateClock();
+    setInterval(updateClock, 1000);
+    shiftBurnIn();
+    setInterval(shiftBurnIn, 60000);
+  </script>
+</body>
+</html>
