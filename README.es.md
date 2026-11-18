@@ -85,7 +85,7 @@ Medido en **Xiaomi Mi Box 4** (Modelo MDZ-16-AB, 2 GB RAM, Android TV 9 / API 28
 
 ### Opción A: Instalar APK Precompilado de Lanzamiento
 
-1. Descarga **`NovaHome-v1.0.0.apk`** desde [GitHub Releases](https://github.com/Jere150/novahome-tv/releases/tag/v1.0.0).
+1. Descarga **`NovaHome-v1.0.0.apk`** desde [GitHub Releases](https://github.com/Jere150/NovaHome-TV/releases/tag/v1.0.0).
 2. Habilita las **Opciones para desarrolladores** y la **Depuración por red / USB** en tu Android TV.
 3. Conecta tu computadora al televisor mediante ADB:
    ```bash
@@ -104,8 +104,8 @@ Para compilar desde el código fuente e instalarlo en tu televisor:
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/Jere150/novahome-tv.git
-cd novahome-tv
+git clone https://github.com/Jere150/NovaHome-TV.git
+cd NovaHome-TV
 
 # Compilar el APK debug con el wrapper de Gradle
 ./gradlew assembleDebug
