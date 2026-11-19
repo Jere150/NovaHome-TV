@@ -83,6 +83,9 @@ Tested on **Xiaomi Mi Box 4** (Model MDZ-16-AB, 2 GB RAM, Android TV 9 / API 28)
 
 ## Installation
 
+> [!NOTE]
+> **System Memory & Optimization Note:** NovaHome TV operates independently consuming under 28 MB of RAM with zero telemetry. However, to reclaim 200–400 MB of system RAM on your TV and prevent the stock Google launcher from running in the background, disabling the stock launcher via ADB is recommended.
+
 ### Option A: Install Pre-Built Release APK
 
 1. Download **`NovaHome-v1.0.0.apk`** from [GitHub Releases](https://github.com/Jere150/NovaHome-TV/releases/tag/v1.0.0).
