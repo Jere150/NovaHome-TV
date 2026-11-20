@@ -221,8 +221,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private final Handler artModeHandler = new Handler(Looper.getMainLooper());
     private final Runnable artModeFadeOut = () -> {
         if (!isFinishing() && screensaverView != null && !screensaverView.isActive()) {
-            if (openPopup != null || isMovingDockCard || isReplacingDockCard || isQuickSettingsOpen) return;
+            if (openPopup != null || isMovingDockCard || isReplacingDockCard || isQuickSettingsOpen
+                    || (currentInputsDialog != null && currentInputsDialog.isShowing())) return;
             if (grid != null) grid.animate().alpha(0f).setDuration(600).start();
+            if (ambient != null) ambient.animate().alpha(0f).setDuration(600).start();
+            if (heroArt != null) heroArt.animate().alpha(0f).setDuration(600).start();
+            if (hero != null) hero.animate().alpha(0f).setDuration(600).start();
             if (glass != null) {
                 if (springX != null) springX.cancel();
                 if (springY != null) springY.cancel();
@@ -241,7 +245,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private final Handler screensaverHandler = new Handler(Looper.getMainLooper());
     private final Runnable screensaverTrigger = () -> {
         if (!isFinishing() && screensaverView != null && !screensaverView.isActive()) {
-            if (openPopup != null || isMovingDockCard || isReplacingDockCard || isQuickSettingsOpen) return;
+            if (openPopup != null || isMovingDockCard || isReplacingDockCard || isQuickSettingsOpen
+                    || (currentInputsDialog != null && currentInputsDialog.isShowing())) return;
             if (ThemeManager.get(this).isScreensaverEnabled()) {
                 screensaverView.activate();
             }
@@ -266,6 +271,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             glass.setVisibility(View.VISIBLE);
             glass.setAlpha(1f);
         }
+        if (ambient != null && ambientGlow) {
+            ambient.animate().cancel();
+            ambient.animate().alpha(1f).setDuration(250).start();
+        }
         if (grid != null) {
             grid.animate().cancel();
             grid.animate().alpha(1f).setDuration(250).start();
@@ -285,7 +294,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             scrimView.animate().alpha(1f).setDuration(250).start();
         }
 
-        if (isQuickSettingsOpen || openPopup != null || isMovingDockCard || isReplacingDockCard) return;
+        if (isQuickSettingsOpen || openPopup != null || isMovingDockCard || isReplacingDockCard
+                || (currentInputsDialog != null && currentInputsDialog.isShowing())) return;
 
         int fadeSec = ThemeManager.get(this).getArtModeFadeSeconds();
         if (fadeSec > 0) {
@@ -619,20 +629,30 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         grid.setTranslationY(deltaY);
 
+        final boolean lowRam = isLowRamDevice() || reducedMotion;
+        final int animDuration = lowRam ? 150 : 240;
+
         grid.post(() -> {
             int childCount = grid.getChildCount();
-            for (int i = 0; i < childCount; i++) {
-                View child = grid.getChildAt(i);
-                if (child == null) continue;
-                int pos = grid.getChildAdapterPosition(child);
-                if (pos >= 6) {
-                    child.setAlpha(0f);
-                    child.animate().alpha(1f).setDuration(240).start();
+            if (!lowRam) {
+                for (int i = 0; i < childCount; i++) {
+                    View child = grid.getChildAt(i);
+                    if (child == null) continue;
+                    int pos = grid.getChildAdapterPosition(child);
+                    if (pos >= 6) {
+                        child.setAlpha(0f);
+                        child.animate().alpha(1f).setDuration(animDuration).start();
+                    }
+                }
+            } else {
+                for (int i = 0; i < childCount; i++) {
+                    View child = grid.getChildAt(i);
+                    if (child != null) child.setAlpha(1f);
                 }
             }
 
             ValueAnimator anim = ValueAnimator.ofFloat(deltaY, 0f);
-            anim.setDuration(240);
+            anim.setDuration(animDuration);
             anim.setInterpolator(new android.view.animation.PathInterpolator(0.4f, 0.0f, 0.2f, 1.0f));
             anim.addUpdateListener(a -> {
                 if (grid != null) grid.setTranslationY((Float) a.getAnimatedValue());
@@ -711,18 +731,23 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         float deltaY = targetPad - grid.getPaddingTop();
 
+        final boolean lowRam = isLowRamDevice() || reducedMotion;
+        final int animDuration = lowRam ? 150 : 240;
+
         int childCount = grid.getChildCount();
-        for (int i = 0; i < childCount; i++) {
-            View child = grid.getChildAt(i);
-            if (child == null) continue;
-            int cPos = grid.getChildAdapterPosition(child);
-            if (cPos >= 6) {
-                child.animate().alpha(0f).setDuration(200).start();
+        if (!lowRam) {
+            for (int i = 0; i < childCount; i++) {
+                View child = grid.getChildAt(i);
+                if (child == null) continue;
+                int cPos = grid.getChildAdapterPosition(child);
+                if (cPos >= 6) {
+                    child.animate().alpha(0f).setDuration(Math.max(100, animDuration - 40)).start();
+                }
             }
         }
 
         ValueAnimator anim = ValueAnimator.ofFloat(0f, deltaY);
-        anim.setDuration(240);
+        anim.setDuration(animDuration);
         anim.setInterpolator(new android.view.animation.PathInterpolator(0.4f, 0.0f, 0.2f, 1.0f));
         anim.addUpdateListener(a -> {
             if (grid != null) grid.setTranslationY((Float) a.getAnimatedValue());
@@ -4239,6 +4264,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         try {
             startActivity(i);
+            onTrimMemory(TRIM_MEMORY_UI_HIDDEN);
         } catch (ActivityNotFoundException | SecurityException e) {
             Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
         }
@@ -4329,6 +4355,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** Dropdown menu under the Inputs pill: HDMI ports (with connection state), AV and Live TV. */
     private void showInputs() {
+        pauseVisualTimers();
         List<CoocaaSources.Source> coocaa = coocaaSources ? CoocaaSources.list(this) : Collections.emptyList();
         if (coocaa.isEmpty() && !sourcePanelService.isEmpty() && liveTvIntent() == null) {
             openSourcePanel();
@@ -4338,6 +4365,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (currentInputsDialog != null && currentInputsDialog.isShowing()) {
             currentInputsDialog.dismiss();
             currentInputsDialog = null;
+            resetVisualTimers();
             return;
         }
 
@@ -4401,6 +4429,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         rootPanel.setOrientation(LinearLayout.VERTICAL);
         rootPanel.setLayoutParams(new ViewGroup.LayoutParams(panelWidth, ViewGroup.LayoutParams.WRAP_CONTENT));
         rootPanel.setClipToOutline(true);
+        rootPanel.setClipChildren(false);
+        rootPanel.setClipToPadding(false);
 
         GradientDrawable panelBg = new GradientDrawable();
         panelBg.setColor(panelColor);
@@ -4431,8 +4461,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         android.widget.ScrollView scroll = new android.widget.ScrollView(this);
         scroll.setVerticalScrollBarEnabled(false);
         scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        scroll.setClipChildren(false);
+        scroll.setClipToPadding(false);
         LinearLayout rows = new LinearLayout(this);
         rows.setOrientation(LinearLayout.VERTICAL);
+        rows.setClipChildren(false);
+        rows.setClipToPadding(false);
         scroll.addView(rows);
 
         LinearLayout.LayoutParams lpScroll = new LinearLayout.LayoutParams(
@@ -4575,6 +4609,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         dialog.setOnDismissListener(d -> {
             currentInputsDialog = null;
+            resetVisualTimers();
             if (btnInputs != null && btnInputs.getVisibility() == View.VISIBLE) {
                 btnInputs.requestFocus();
             }
@@ -4657,13 +4692,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             if (hasFocus) {
                 rowBg.setColor((glowColor & 0x00FFFFFF) | 0x33000000);
                 rowBg.setStroke((int) (2 * density), glowColor);
-                row.setScaleX(1.02f);
-                row.setScaleY(1.02f);
             } else {
                 rowBg.setColor(Color.parseColor("#1C2130"));
                 rowBg.setStroke((int) Math.max(1, density), Color.parseColor("#262D3E"));
-                row.setScaleX(1.0f);
-                row.setScaleY(1.0f);
             }
         });
 
@@ -5095,6 +5126,18 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
     }
 
+    private boolean isLowRamDevice() {
+        try {
+            android.app.ActivityManager am = (android.app.ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+            if (am != null) {
+                android.app.ActivityManager.MemoryInfo mi = new android.app.ActivityManager.MemoryInfo();
+                am.getMemoryInfo(mi);
+                return mi.totalMem <= 1_200_000_000L;
+            }
+        } catch (Throwable ignored) {}
+        return false;
+    }
+
     private void moveDockCardLeft() {
         if (movingDockPos > 0) {
             ThemeManager tm = ThemeManager.get(this);
@@ -5185,8 +5228,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         setHudFocusable(false);
         pauseVisualTimers();
-
-        Toast.makeText(this, getString(R.string.toast_replace_mode_instruction, newLabel != null ? newLabel : ""), Toast.LENGTH_LONG).show();
 
         if (isDockExpanded) {
             collapseDockGrid();

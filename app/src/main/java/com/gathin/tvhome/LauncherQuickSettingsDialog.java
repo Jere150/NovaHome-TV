@@ -138,30 +138,32 @@ public final class LauncherQuickSettingsDialog {
         int padTop = (int) (16 * density);
         root.setPadding(padH, padTop, padH, (int) (14 * density));
 
-        // Cabecera
-        TextView tvTitle = new TextView(context);
-        tvTitle.setText(context.getString(R.string.settings_title));
-        tvTitle.setTextColor(Color.WHITE);
-        tvTitle.setTextSize(19f);
-        tvTitle.setSingleLine(true);
-        root.addView(tvTitle);
-
-        TextView tvSubtitle = new TextView(context);
-        tvSubtitle.setText(context.getString(R.string.settings_subtitle));
-        tvSubtitle.setTextColor(Color.parseColor("#80FFFFFF"));
-        tvSubtitle.setTextSize(11f);
-        tvSubtitle.setPadding(0, (int) (2 * density), 0, (int) (10 * density));
-        root.addView(tvSubtitle);
-
         // Contenedor scrollable
         ScrollView scroll = new ScrollView(context);
         scroll.setVerticalScrollBarEnabled(false);
         scroll.setClipToPadding(false);
         LinearLayout content = new LinearLayout(context);
         content.setOrientation(LinearLayout.VERTICAL);
+        content.setClipChildren(false);
+        content.setClipToPadding(false);
         scroll.addView(content);
         root.addView(scroll, new LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f));
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        // Cabecera anclada al inicio del contenido scrollable
+        TextView tvTitle = new TextView(context);
+        tvTitle.setText(context.getString(R.string.settings_title));
+        tvTitle.setTextColor(Color.WHITE);
+        tvTitle.setTextSize(19f);
+        tvTitle.setSingleLine(true);
+        content.addView(tvTitle);
+
+        TextView tvSubtitle = new TextView(context);
+        tvSubtitle.setText(context.getString(R.string.settings_subtitle));
+        tvSubtitle.setTextColor(Color.parseColor("#80FFFFFF"));
+        tvSubtitle.setTextSize(11f);
+        tvSubtitle.setPadding(0, (int) (2 * density), 0, (int) (10 * density));
+        content.addView(tvSubtitle);
 
         // --- 1. TEMAS Y PERFILES GUARDADOS ---
         addSectionHeader(content, context, context.getString(R.string.settings_section_themes));
@@ -169,6 +171,8 @@ public final class LauncherQuickSettingsDialog {
         // Contenedor dinámico de temas (incluye chip inicial '+ Guardar')
         LinearLayout themesRowContainer = new LinearLayout(context);
         themesRowContainer.setOrientation(LinearLayout.VERTICAL);
+        themesRowContainer.setClipChildren(false);
+        themesRowContainer.setClipToPadding(false);
         content.addView(themesRowContainer);
 
         List<Runnable> dynamicThemedUpdaters = new ArrayList<>();
@@ -430,9 +434,12 @@ public final class LauncherQuickSettingsDialog {
         HorizontalScrollView hsv = new HorizontalScrollView(context);
         hsv.setHorizontalScrollBarEnabled(false);
         hsv.setClipToPadding(false);
+        hsv.setClipChildren(false);
 
         LinearLayout row = new LinearLayout(context);
         row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setClipChildren(false);
+        row.setClipToPadding(false);
         hsv.addView(row);
 
         int padH = (int) (12 * density);
@@ -460,8 +467,6 @@ public final class LauncherQuickSettingsDialog {
 
         btnSave.setOnFocusChangeListener((v, hasFocus) -> {
             btnSave.setBackground(hasFocus ? saveFocusBg : saveNormalBg);
-            btnSave.setScaleX(hasFocus ? 1.05f : 1.0f);
-            btnSave.setScaleY(hasFocus ? 1.05f : 1.0f);
             if (hasFocus) {
                 hsv.smoothScrollTo(Math.max(0, v.getLeft() - (int) (24 * density)), 0);
             }
@@ -503,8 +508,6 @@ public final class LauncherQuickSettingsDialog {
 
             btn.setOnFocusChangeListener((v, hasFocus) -> {
                 btn.setBackground(hasFocus ? focusBg : normalBg);
-                btn.setScaleX(hasFocus ? 1.05f : 1.0f);
-                btn.setScaleY(hasFocus ? 1.05f : 1.0f);
                 if (hasFocus) {
                     hsv.smoothScrollTo(Math.max(0, v.getLeft() - (int) (24 * density)), 0);
                 }
@@ -560,8 +563,6 @@ public final class LauncherQuickSettingsDialog {
 
             btn.setOnFocusChangeListener((v, hasFocus) -> {
                 btn.setBackground(hasFocus ? focusBg : normalBg);
-                btn.setScaleX(hasFocus ? 1.05f : 1.0f);
-                btn.setScaleY(hasFocus ? 1.05f : 1.0f);
                 if (hasFocus) {
                     hsv.smoothScrollTo(Math.max(0, v.getLeft() - (int) (24 * density)), 0);
                 }
@@ -801,8 +802,6 @@ public final class LauncherQuickSettingsDialog {
 
         pill.setOnFocusChangeListener((v, hasFocus) -> {
             pill.setBackground(hasFocus ? focusBg : normalBg);
-            pill.setScaleX(hasFocus ? 1.05f : 1.0f);
-            pill.setScaleY(hasFocus ? 1.05f : 1.0f);
         });
         pill.setOnClickListener(onClick);
         return pill;
@@ -1063,7 +1062,9 @@ public final class LauncherQuickSettingsDialog {
         LinearLayout row = new LinearLayout(context);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setGravity(Gravity.CENTER_VERTICAL);
-        row.setPadding(0, (int) (4 * density), 0, (int) (6 * density));
+        row.setClipChildren(false);
+        row.setClipToPadding(false);
+        row.setPadding(0, (int) (6 * density), 0, (int) (6 * density));
 
         final String[] currentSelectedHex = {initialHex};
 
@@ -1084,8 +1085,8 @@ public final class LauncherQuickSettingsDialog {
             dot.setBackground(dotBg);
 
             dot.setOnFocusChangeListener((v, hasFocus) -> {
-                dot.setScaleX(hasFocus ? 1.35f : 1.0f);
-                dot.setScaleY(hasFocus ? 1.35f : 1.0f);
+                dot.setScaleX(hasFocus ? 1.15f : 1.0f);
+                dot.setScaleY(hasFocus ? 1.15f : 1.0f);
                 dotBg.setStroke(hasFocus ? (int) (2.5f * density) : (int) Math.max(1, density),
                         hasFocus ? Color.WHITE : Color.parseColor("#4C566A"));
             });
@@ -1129,8 +1130,6 @@ public final class LauncherQuickSettingsDialog {
         if (updaters != null) updaters.add(refreshHsv);
 
         btnHsv.setOnFocusChangeListener((v, hasFocus) -> {
-            btnHsv.setScaleX(hasFocus ? 1.15f : 1.0f);
-            btnHsv.setScaleY(hasFocus ? 1.15f : 1.0f);
             hsvBg.setColor(hasFocus ? getPillFocusColor(tm) : getPillNormalColor(tm));
         });
 
@@ -1410,8 +1409,6 @@ public final class LauncherQuickSettingsDialog {
 
         btn.setOnFocusChangeListener((v, hasFocus) -> {
             btn.setBackground(hasFocus ? focusBg : normalBg);
-            btn.setScaleX(hasFocus ? 1.02f : 1.0f);
-            btn.setScaleY(hasFocus ? 1.02f : 1.0f);
         });
 
         LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(

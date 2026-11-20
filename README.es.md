@@ -144,6 +144,20 @@ Si prefieres no usar una computadora ni comandos ADB:
 
 ---
 
+### Configuración del Salvapantallas y Modo Arte
+
+NovaHome TV cuenta con su propio motor de **Modo Arte** y **Salvapantallas cinemático** de bajo consumo para proteger paneles OLED y LCD contra el quemado de imagen.
+
+* **Comportamiento nativo:** NovaHome mantiene la pantalla activa mientras su salvapantallas interno está visible.
+* **Coexistencia con Google Backdrop:** En ciertos modelos de Android TV / Google TV, el protector de pantalla de fábrica del sistema operativo puede forzar su aparición si detecta inactividad del control remoto. Para disfrutar del salvapantallas y Modo Arte de NovaHome de forma continua e ininterrumpida, puedes desactivar el salvapantallas nativo desde:
+  * *Ajustes del TV $\rightarrow$ Preferencias del dispositivo $\rightarrow$ Salvapantallas $\rightarrow$ Desactivar (o fijar en tiempo mayor)*.
+  * O bien ejecutar el siguiente comando por ADB:
+    ```bash
+    adb shell settings put secure screensaver_enabled 0
+    ```
+
+---
+
 ## Licencia y Reconocimientos a Terceros
 
 NovaHome TV se distribuye bajo la [Licencia MIT](LICENSE).

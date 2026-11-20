@@ -144,6 +144,20 @@ If you prefer not to use a computer or ADB command line:
 
 ---
 
+### Screensaver & Art Mode Setup
+
+NovaHome TV includes a built-in low-power **Art Mode** and **cinematic screensaver** engine to prevent burn-in on OLED and LCD displays.
+
+* **Native Behavior:** NovaHome maintains the screen active while its internal screensaver is visible.
+* **Coexistence with Google Backdrop:** On certain Android TV / Google TV devices, the OS system screensaver may force-activate if remote inactivity is detected. To ensure uninterrupted playback of NovaHome's screensaver and Art Mode, you can disable the system daydream from:
+  * *TV Settings -> Device Preferences -> Screensaver -> Turn off (or increase idle timer)*.
+  * Or by executing the following ADB command:
+    ```bash
+    adb shell settings put secure screensaver_enabled 0
+    ```
+
+---
+
 ## License & Third-Party Attribution
 
 NovaHome TV is released under the [MIT License](LICENSE).

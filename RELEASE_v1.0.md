@@ -1,6 +1,6 @@
-# NovaHome TV v1.0.0 Stable
+# NovaHome TV v1.0 Stable
 
-Welcome to the official launch of **NovaHome TV (v1.0.0 Stable)** — an ultra-lightweight, hardware-accelerated, and privacy-first application launcher crafted specifically for Android TV and Google TV devices.
+Welcome to the official launch of **NovaHome TV (v1.0 Stable)** — an ultra-lightweight, hardware-accelerated, and privacy-first application launcher crafted specifically for Android TV and Google TV devices.
 
 ---
 
@@ -50,5 +50,5 @@ NovaHome TV originated as an independent custom re-engineering based on the open
 
 ### Assets
 
-* **`NovaHome-v1.0.0.apk`** — Production-ready APK package compatible with Android TV 8.0 (API 26) through Android TV 14+.
+* **`NovaHome-v1.0.apk`** — Production-ready APK package compatible with Android TV 8.0 (API 26) through Android TV 14+.
 * **Source code (zip / tar.gz)** — Complete clean source tree.
