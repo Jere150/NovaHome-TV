@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Inicio</string>
+    <string name="app_name">NovaHome TV</string>
     <string name="inputs">Entradas</string>
     <string name="wifi">Wi-Fi</string>
     <string name="settings">Configuración</string>
@@ -145,4 +145,7 @@
     <string name="race_countdown_hours">%1$dh %2$dm</string>
     <string name="race_countdown_days">%1$dd %2$dh</string>
     <string name="last_opened">Última apertura: %1$s</string>
+    <string name="dialog_replace_pinned_title">¿Qué app deseas reemplazar?</string>
+    <string name="dialog_replace_pinned_hint">Elige la app que sustituirá a %1$s</string>
+    <string name="toast_app_replaced">App reemplazada en el dock</string>
 </resources>
