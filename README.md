@@ -66,10 +66,13 @@ NovaHome TV was built to bring speed, privacy, and simplicity back to your TV:
 
 You can completely redefine your TV's atmosphere with your own high-resolution wallpapers, adjusting dock opacity and synchronizing accent glows in real time:
 
-| Custom Theme with Personal Wallpaper | Live Floating Quick Settings |
+| Minimalist Home & Dock | Expanded Application Drawer |
 |:---:|:---:|
-| <img src="docs/screenshots/05_custom_theme.webp" width="480" alt="Custom Theme"/> | <img src="docs/screenshots/06_settings_custom.webp" width="480" alt="Quick Settings"/> |
-| *Personal high-res wallpaper paired with synchronized neon accents.* | *Floating side settings for immediate color, glow, and opacity tuning.* |
+| <img src="docs/screenshots/05_custom_home_dock.webp" width="480" alt="Custom Home Dock"/> | <img src="docs/screenshots/06_custom_app_drawer.webp" width="480" alt="Custom App Drawer"/> |
+| *Personal high-res wallpaper paired with synchronized neon accents.* | *Smooth application grid seamlessly integrated over custom background art.* |
+| Custom Art Mode | Cinematic OLED Screensaver |
+| <img src="docs/screenshots/07_custom_art_mode.webp" width="480" alt="Custom Art Mode"/> | <img src="docs/screenshots/04_screensaver.webp" width="480" alt="Screensaver"/> |
+| *Uncluttered ambient art mode showcasing full wallpaper artwork.* | *Ultra-lightweight floating clock with anti-burn-in protection.* |
 
 ---
 

@@ -66,10 +66,13 @@ NovaHome TV fue creado para devolverle la velocidad, la privacidad y la limpieza
 
 Puedes transformar completamente la estética de tu televisor usando fondos propios, ajustando la opacidad y sincronizando el resplandor de acento con el selector HSV en vivo:
 
-| Tema Personalizado con Fondo Propio | Ajustes Flotantes en Tiempo Real |
+| Home Minimalista y Dock | Cajón de Aplicaciones Expandido |
 |:---:|:---:|
-| <img src="docs/screenshots/05_custom_theme.webp" width="480" alt="Tema Personalizado"/> | <img src="docs/screenshots/06_settings_custom.webp" width="480" alt="Ajustes Rápidos"/> |
-| *Fondo propio de alta resolución con resplandor neón sincronizado.* | *Panel lateral flotante con ajuste inmediato de color, brillo y opacidad.* |
+| <img src="docs/screenshots/05_custom_home_dock.webp" width="480" alt="Dock Personalizado"/> | <img src="docs/screenshots/06_custom_app_drawer.webp" width="480" alt="Cajón de Apps Personalizado"/> |
+| *Fondo propio de alta resolución con resplandor neón sincronizado.* | *Cuadrícula de aplicaciones fluida integrada sobre el arte del fondo.* |
+| Modo Arte Personalizado | Salvapantallas Cinemático OLED |
+| <img src="docs/screenshots/07_custom_art_mode.webp" width="480" alt="Modo Arte Personalizado"/> | <img src="docs/screenshots/04_screensaver.webp" width="480" alt="Salvapantallas"/> |
+| *Modo Arte ambiental limpio mostrando la ilustración completa.* | *Reloj flotante ultra-ligero con protección anti-quemado OLED.* |
 
 ---
 
