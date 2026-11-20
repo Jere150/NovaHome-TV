@@ -1,4 +1,4 @@
-# NovaHome TV (v1.0.0 Stable)
+# NovaHome TV (v1.0 Stable)
 
 <p align="center">
   <strong>Ultra-lightweight, hardware-accelerated, and privacy-focused Android TV launcher written in 100% pure Java 17.</strong><br>
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Release-v1.0.0--Stable-brightgreen?style=flat-square" alt="Release">
+  <img src="https://img.shields.io/badge/Release-v1.0--Stable-brightgreen?style=flat-square" alt="Release">
   <img src="https://img.shields.io/badge/Android%20TV-8.0%2B%20(API%2026%2B)-blue?style=flat-square" alt="Platform">
   <img src="https://img.shields.io/badge/Language-Pure%20Java%2017-orange?style=flat-square" alt="Language">
   <img src="https://img.shields.io/badge/Dependencies-Minimal%20AndroidX%20(No%20Compose)-success?style=flat-square" alt="Dependencies">
@@ -88,7 +88,7 @@ Tested on **Xiaomi Mi Box 4** (Model MDZ-16-AB, 2 GB RAM, Android TV 9 / API 28)
 
 ### Option A: Install Pre-Built Release APK
 
-1. Download **`NovaHome-v1.0.0.apk`** from [GitHub Releases](https://github.com/Jere150/NovaHome-TV/releases/tag/v1.0.0).
+1. Download **`NovaHome-v1.0.apk`** from [GitHub Releases](https://github.com/Jere150/NovaHome-TV/releases/tag/v1.0).
 2. Enable **Developer Options** and **Network / USB Debugging** on your Android TV.
 3. Connect your computer to your TV over ADB:
    ```bash
@@ -96,7 +96,7 @@ Tested on **Xiaomi Mi Box 4** (Model MDZ-16-AB, 2 GB RAM, Android TV 9 / API 28)
    ```
 4. Install the release package:
    ```bash
-   adb install -r NovaHome-v1.0.0.apk
+   adb install -r NovaHome-v1.0.apk
    ```
 
 ---
