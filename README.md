@@ -41,7 +41,7 @@
 * **Demand-Driven Dock:** A clean install starts completely uncluttered with 0 pinned icons. Pin up to 6 favourite apps on demand with an intuitive 6/6 interactive replacement dialog.
 * **Millimeter-Accurate HSV Color Picker:** Native Canvas-drawn 2D HSV matrix with dedicated horizontal saturation bar and fine-grained D-Pad step control (50 steps per axis).
 * **Pixel-Aligned Floating Quick Settings:** The settings window dynamically synchronizes its right edge with the dock capsule down to the exact subpixel.
-* **Automatic Bilingual Support:** Fully localized in English and Spanish based on system locale, including formatted dynamic dates and clocks.
+* **Bilingual Core & Extended Localization:** Fully audited and maintained natively in English and Spanish, with dynamic locale-aware date/clock formatting. Also retains 23 inherited localization resource sets from upstream (`res/values-*`) across standard Leanback TV strings.
 * **Privacy by Design:** Zero analytics, zero telemetry, zero advertising SDKs, and zero background network polling.
 
 ---

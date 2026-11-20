@@ -373,8 +373,10 @@
 
                 <TextView
                     android:id="@+id/btnInputs"
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
+                    style="@style/HudButtonIcon"
+                    android:contentDescription="@string/inputs"
+                    android:drawableStart="@drawable/ic_input"
+                    android:nextFocusDown="@+id/grid"
                     android:visibility="gone" />
 
                 <TextView

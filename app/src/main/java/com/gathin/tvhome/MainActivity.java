@@ -100,11 +100,15 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * tvOS style home: black, a pinned dock row, an app grid, and one glass highlight that springs between tiles.
  */
 public class MainActivity extends Activity implements AppAdapter.TileListener {
+    private final ExecutorService ioExecutor = Executors.newSingleThreadExecutor();
+
     @Override
     protected void attachBaseContext(android.content.Context base) {
         super.attachBaseContext(LauncherLocale.wrap(base));   // locale
@@ -423,18 +427,27 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
 
 
-    private void copyUriToFile(Uri srcUri, File destFile) {
-        try (InputStream in = getContentResolver().openInputStream(srcUri);
-             OutputStream out = new FileOutputStream(destFile)) {
-            byte[] buf = new byte[8192];
-            int len;
-            while ((len = in.read(buf)) > 0) {
-                out.write(buf, 0, len);
+    private void copyUriToFile(Uri srcUri, File destFile, Runnable onSuccess) {
+        ioExecutor.execute(() -> {
+            boolean success = false;
+            try (InputStream in = getContentResolver().openInputStream(srcUri);
+                 OutputStream out = new FileOutputStream(destFile)) {
+                if (in == null) return;
+                byte[] buf = new byte[8192];
+                int len;
+                while ((len = in.read(buf)) > 0) {
+                    out.write(buf, 0, len);
+                }
+                out.flush();
+                success = true;
+            } catch (Exception e) {
+                android.util.Log.e("NovaHome", "Error al copiar archivo desde URI en segundo plano", e);
+                runOnUiThread(() -> Toast.makeText(this, "Error copiando archivo: " + e.getMessage(), Toast.LENGTH_SHORT).show());
             }
-            out.flush();
-        } catch (Exception e) {
-            Toast.makeText(this, "Error copiando archivo: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
+            if (success && onSuccess != null) {
+                runOnUiThread(onSuccess);
+            }
+        });
     }
 
 
@@ -1957,24 +1970,26 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             Uri uri = data.getData();
             if (requestCode == REQUEST_PICK_WALLPAPER) {
                 File target = new File(getExternalFilesDir(null), "custom_wallpaper.jpg");
-                copyUriToFile(uri, target);
-                if (target.exists()) {
-                    ThemeManager tm = ThemeManager.get(this);
-                    tm.setWallpaperSource(target.getAbsolutePath());
-                    tm.save();
-                    loadCustomWallpaper();
-                    LauncherToast.show(this, getString(R.string.toast_wallpaper_applied));
-                }
+                copyUriToFile(uri, target, () -> {
+                    if (target.exists()) {
+                        ThemeManager tm = ThemeManager.get(this);
+                        tm.setWallpaperSource(target.getAbsolutePath());
+                        tm.save();
+                        loadCustomWallpaper();
+                        LauncherToast.show(this, getString(R.string.toast_wallpaper_applied));
+                    }
+                });
             } else if (requestCode == REQUEST_PICK_SCREENSAVER_HTML) {
                 File target = new File(getExternalFilesDir(null), "custom_screensaver.html");
-                copyUriToFile(uri, target);
-                if (target.exists()) {
-                    ThemeManager tm = ThemeManager.get(this);
-                    tm.setScreensaverType("custom_html");
-                    tm.setScreensaverSource(target.getAbsolutePath());
-                    tm.save();
-                    LauncherToast.show(this, getString(R.string.toast_screensaver_applied));
-                }
+                copyUriToFile(uri, target, () -> {
+                    if (target.exists()) {
+                        ThemeManager tm = ThemeManager.get(this);
+                        tm.setScreensaverType("custom_html");
+                        tm.setScreensaverSource(target.getAbsolutePath());
+                        tm.save();
+                        LauncherToast.show(this, getString(R.string.toast_screensaver_applied));
+                    }
+                });
             }
         }
     }
@@ -2239,6 +2254,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         RemoteKeys.release(this);
         cancelHoldOk();
         if (gameDay != null) gameDay.shutdown();
+        ioExecutor.shutdown();
         unregisterReceiver(packageReceiver);
         if (openOnStartOnWake) unregisterReceiver(wakeReceiver);
         try {

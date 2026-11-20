@@ -41,7 +41,7 @@
 * **Dock Bajo Demanda:** Una instalación limpia inicia con 0 iconos fijados. Fija hasta 6 aplicaciones favoritas según tus preferencias, con un diálogo interactivo de sustitución 6/6 al completarse el cupo.
 * **Selector HSV de Precisión Milimétrica:** Matriz 2D HSV dibujada en Canvas con barra horizontal de saturación y paso fino con la cruceta D-Pad (50 pasos por eje).
 * **Ajustes Flotantes Alineados al Píxel:** El panel lateral sincroniza su borde derecho directamente con la cápsula del dock de forma milimétrica.
-* **Soporte Bilingüe Automático:** Interfaz completamente localizada en español e inglés según el idioma del sistema, incluyendo formatos de fecha y hora dinámicos.
+* **Núcleo Bilingüe y Localización Extendida:** Interfaz completamente auditada y mantenida de forma nativa en español e inglés según el idioma del sistema, incluyendo fechas y relojes dinámicos. Conserva además 23 idiomas heredados del upstream original (`res/values-*`) para cadenas básicas de TV y Leanback.
 * **Privacidad Absoluta:** Cero telemetría, cero anuncios, cero librerías analíticas y cero peticiones de red en segundo plano.
 
 ---

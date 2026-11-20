@@ -30,6 +30,9 @@ import java.util.List;
 public final class ThemeManager {
     private static final String TAG = "ThemeManager";
     private static final String FILE_NAME = "theme.json";
+    private static final String USER_LAYOUT_FILE = "user_layout.json";
+    private static final String PREFS_THEME = "novahome_theme";
+    private static final String PREFS_USER_LAYOUT = "novahome_user_layout";
     public static final int MAX_DOCK_APPS = 6;
     private static volatile ThemeManager instance;
 
@@ -37,6 +40,9 @@ public final class ThemeManager {
     private final File primaryConfigFile;
     private final File internalConfigFile;
     private final File downloadConfigFile;
+
+    private final File primaryLayoutFile;
+    private final File internalLayoutFile;
 
     // Campos del tema
     private String themeName = "obsidian_glass_default";
@@ -75,6 +81,9 @@ public final class ThemeManager {
         this.primaryConfigFile = new File(externalFiles, FILE_NAME);
         this.internalConfigFile = new File(appContext.getFilesDir(), FILE_NAME);
         this.downloadConfigFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), FILE_NAME);
+
+        this.primaryLayoutFile = new File(externalFiles, USER_LAYOUT_FILE);
+        this.internalLayoutFile = new File(appContext.getFilesDir(), USER_LAYOUT_FILE);
         load();
     }
 
@@ -109,19 +118,44 @@ public final class ThemeManager {
                 String jsonStr = readFile(target);
                 JSONObject root = new JSONObject(jsonStr);
                 parseJson(root);
-                Log.i(TAG, "Configuración cargada exitosamente de: " + target.getName());
-                save();
+                Log.i(TAG, "Configuración visual cargada exitosamente de: " + target.getName());
+            } catch (Exception e) {
+                Log.e(TAG, "Error al leer o parsear " + target.getAbsolutePath(), e);
+            }
+        } else {
+            createDefaultVisuals();
+        }
+
+        // Cargar layout de usuario desacoplado de la estética visual
+        loadUserLayout();
+
+        save();
+    }
+
+    public synchronized void loadUserLayout() {
+        File targetLayout = null;
+        if (primaryLayoutFile.exists() && primaryLayoutFile.canRead()) {
+            targetLayout = primaryLayoutFile;
+        } else if (internalLayoutFile.exists() && internalLayoutFile.canRead()) {
+            targetLayout = internalLayoutFile;
+        }
+
+        if (targetLayout != null) {
+            try {
+                String jsonStr = readFile(targetLayout);
+                JSONObject root = new JSONObject(jsonStr);
+                parseUserLayoutJson(root);
+                Log.i(TAG, "Layout de usuario cargado exitosamente de: " + targetLayout.getName());
                 return;
             } catch (Exception e) {
-                Log.e(TAG, "Error al leer o parsear " + target.getAbsolutePath() + ", intentando SharedPreferences", e);
+                Log.e(TAG, "Error al leer o parsear " + targetLayout.getAbsolutePath(), e);
             }
         }
 
-        SharedPreferences sp = appContext.getSharedPreferences("novahome_theme", Context.MODE_PRIVATE);
-        boolean spCustom = sp.getBoolean("has_user_custom_pins", false);
-        if (spCustom) {
-            this.hasUserCustomPins = true;
-            String spPkgsJson = sp.getString("dock_pinned_packages", null);
+        SharedPreferences spLayout = appContext.getSharedPreferences(PREFS_USER_LAYOUT, Context.MODE_PRIVATE);
+        if (spLayout.contains("has_user_custom_pins")) {
+            this.hasUserCustomPins = spLayout.getBoolean("has_user_custom_pins", false);
+            String spPkgsJson = spLayout.getString("dock_pinned_packages", null);
             dockPinnedPackages.clear();
             if (spPkgsJson != null) {
                 try {
@@ -135,11 +169,85 @@ public final class ThemeManager {
                     }
                 } catch (Exception ignored) {}
             }
-            save();
+            saveUserLayout();
             return;
         }
 
-        createDefaultAndSave();
+        // Migración hacia atrás desde el SharedPreferences original novahome_theme
+        SharedPreferences spLegacy = appContext.getSharedPreferences(PREFS_THEME, Context.MODE_PRIVATE);
+        if (spLegacy.contains("has_user_custom_pins")) {
+            this.hasUserCustomPins = spLegacy.getBoolean("has_user_custom_pins", false);
+            String spPkgsJson = spLegacy.getString("dock_pinned_packages", null);
+            dockPinnedPackages.clear();
+            if (spPkgsJson != null) {
+                try {
+                    JSONArray arr = new JSONArray(spPkgsJson);
+                    for (int i = 0; i < arr.length(); i++) {
+                        String pkg = arr.optString(i, "").trim();
+                        if (!pkg.isEmpty() && !dockPinnedPackages.contains(pkg)) {
+                            dockPinnedPackages.add(pkg);
+                            if (dockPinnedPackages.size() >= MAX_DOCK_APPS) break;
+                        }
+                    }
+                } catch (Exception ignored) {}
+            }
+            saveUserLayout();
+            return;
+        }
+
+        // Si es una primera instalación sin apps fijadas, autopoblar
+        if (dockPinnedPackages.isEmpty()) {
+            autoPopulateInitialApps();
+            saveUserLayout();
+        }
+    }
+
+    private void parseUserLayoutJson(JSONObject root) {
+        this.hasUserCustomPins = root.optBoolean("has_user_custom_pins", false);
+        dockPinnedPackages.clear();
+        JSONArray pkgs = root.optJSONArray("dock_pinned_packages");
+        if (pkgs != null) {
+            for (int i = 0; i < pkgs.length(); i++) {
+                String pkg = pkgs.optString(i, "").trim();
+                if (!pkg.isEmpty() && !dockPinnedPackages.contains(pkg)) {
+                    dockPinnedPackages.add(pkg);
+                    if (dockPinnedPackages.size() >= MAX_DOCK_APPS) break;
+                }
+            }
+        }
+    }
+
+    public synchronized boolean saveUserLayout() {
+        try {
+            JSONObject root = new JSONObject();
+            root.put("version", 1);
+            root.put("has_user_custom_pins", hasUserCustomPins);
+            JSONArray pkgs = new JSONArray();
+            for (String pkg : dockPinnedPackages) {
+                pkgs.put(pkg);
+            }
+            root.put("dock_pinned_packages", pkgs);
+            String outStr = root.toString(2);
+
+            writeFile(primaryLayoutFile, outStr);
+            if (internalLayoutFile != null) {
+                try {
+                    writeFile(internalLayoutFile, outStr);
+                } catch (Exception ignored) {}
+            }
+
+            SharedPreferences sp = appContext.getSharedPreferences(PREFS_USER_LAYOUT, Context.MODE_PRIVATE);
+            sp.edit()
+                .putBoolean("has_user_custom_pins", hasUserCustomPins)
+                .putString("dock_pinned_packages", pkgs.toString())
+                .apply();
+
+            Log.i(TAG, "user_layout.json guardado correctamente");
+            return true;
+        } catch (Exception e) {
+            Log.e(TAG, "Error guardando user_layout.json", e);
+            return false;
+        }
     }
 
     private void parseJson(JSONObject root) {
@@ -163,37 +271,17 @@ public final class ThemeManager {
             this.showUnfocusedLabels = d.optBoolean("show_unfocused_labels", false);
         }
 
-        this.hasUserCustomPins = root.optBoolean("has_user_custom_pins", false);
-        if (!this.hasUserCustomPins) {
-            SharedPreferences sp = appContext.getSharedPreferences("novahome_theme", Context.MODE_PRIVATE);
-            this.hasUserCustomPins = sp.getBoolean("has_user_custom_pins", false);
-        }
-
-        dockPinnedPackages.clear();
-        JSONArray pkgs = root.optJSONArray("dock_pinned_packages");
-        if (pkgs != null && pkgs.length() > 0) {
-            this.hasUserCustomPins = true;
-            for (int i = 0; i < pkgs.length(); i++) {
-                String pkg = pkgs.optString(i, "").trim();
-                if (!pkg.isEmpty() && !dockPinnedPackages.contains(pkg)) {
-                    dockPinnedPackages.add(pkg);
-                    if (dockPinnedPackages.size() >= MAX_DOCK_APPS) break;
-                }
-            }
-        } else if (this.hasUserCustomPins) {
-            SharedPreferences sp = appContext.getSharedPreferences("novahome_theme", Context.MODE_PRIVATE);
-            String savedArr = sp.getString("dock_pinned_packages", null);
-            if (savedArr != null) {
-                try {
-                    JSONArray arr = new JSONArray(savedArr);
-                    for (int i = 0; i < arr.length(); i++) {
-                        String pkg = arr.optString(i, "").trim();
-                        if (!pkg.isEmpty() && !dockPinnedPackages.contains(pkg)) {
-                            dockPinnedPackages.add(pkg);
-                            if (dockPinnedPackages.size() >= MAX_DOCK_APPS) break;
-                        }
+        // Si el usuario no tiene apps fijadas ni layout previo, permitir que el tema sugiera iniciales
+        if (!this.hasUserCustomPins && this.dockPinnedPackages.isEmpty()) {
+            JSONArray pkgs = root.optJSONArray("dock_pinned_packages");
+            if (pkgs != null && pkgs.length() > 0) {
+                for (int i = 0; i < pkgs.length(); i++) {
+                    String pkg = pkgs.optString(i, "").trim();
+                    if (!pkg.isEmpty() && !dockPinnedPackages.contains(pkg)) {
+                        dockPinnedPackages.add(pkg);
+                        if (dockPinnedPackages.size() >= MAX_DOCK_APPS) break;
                     }
-                } catch (Exception ignored) {}
+                }
             }
         }
 
@@ -227,7 +315,7 @@ public final class ThemeManager {
         }
     }
 
-    private void createDefaultAndSave() {
+    private void createDefaultVisuals() {
         this.themeName = "obsidian_glass_default";
         this.wallpaperSource = "";
         this.artModeFadeSeconds = 7;
@@ -245,10 +333,13 @@ public final class ThemeManager {
         this.screensaverType = "custom_html";
         this.screensaverSource = "";
         this.antiBurnInCycle = true;
+    }
 
+    private void createDefaultAndSave() {
+        createDefaultVisuals();
         this.hasUserCustomPins = false;
         this.dockPinnedPackages.clear();
-
+        saveUserLayout();
         save();
     }
 
@@ -270,7 +361,9 @@ public final class ThemeManager {
                 } catch (Exception ignored) {}
             }
 
-            SharedPreferences sp = appContext.getSharedPreferences("novahome_theme", Context.MODE_PRIVATE);
+            saveUserLayout();
+
+            SharedPreferences sp = appContext.getSharedPreferences(PREFS_THEME, Context.MODE_PRIVATE);
             JSONArray arr = new JSONArray();
             for (String p : dockPinnedPackages) {
                 arr.put(p);
@@ -278,7 +371,7 @@ public final class ThemeManager {
             sp.edit()
                 .putBoolean("has_user_custom_pins", hasUserCustomPins)
                 .putString("dock_pinned_packages", arr.toString())
-                .commit();
+                .apply();
 
             Log.i(TAG, "theme.json guardado correctamente en: " + primaryConfigFile.getAbsolutePath());
             return true;
@@ -619,8 +712,14 @@ public final class ThemeManager {
             if (downloadConfigFile != null && downloadConfigFile.exists()) {
                 downloadConfigFile.delete();
             }
-            SharedPreferences sp = appContext.getSharedPreferences("novahome_theme", Context.MODE_PRIVATE);
-            sp.edit().clear().commit();
+            if (primaryLayoutFile != null && primaryLayoutFile.exists()) {
+                primaryLayoutFile.delete();
+            }
+            if (internalLayoutFile != null && internalLayoutFile.exists()) {
+                internalLayoutFile.delete();
+            }
+            appContext.getSharedPreferences(PREFS_THEME, Context.MODE_PRIVATE).edit().clear().apply();
+            appContext.getSharedPreferences(PREFS_USER_LAYOUT, Context.MODE_PRIVATE).edit().clear().apply();
             File externalFiles = appContext.getExternalFilesDir(null);
             if (externalFiles != null) {
                 new File(externalFiles, "custom_wallpaper.jpg").delete();
