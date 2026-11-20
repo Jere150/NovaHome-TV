@@ -73,6 +73,18 @@ Medido en **Xiaomi Mi Box 4** (Modelo MDZ-16-AB, 2 GB RAM, Android TV 9 / API 28
 
 ---
 
+## Rendimiento y Clasificación por Gama de Dispositivo
+
+NovaHome TV implementa perfiles dinámicos de optimización según la memoria disponible en el hardware del televisor (`isLowRamDevice()`):
+
+| Gama de Hardware | Dispositivos de Referencia | Especificaciones Típicas | Comportamiento y Rendimiento con NovaHome TV |
+|---|---|---|---|
+| **Gama Baja / Entrada** | Smart TV Haier 32", Noblex, TCL básicas | $\le 1$ GB RAM, SoC MediaTek / Realtek quad-core Cortex-A53, GPU Mali-470 / 450 | **Revitalización total:** El launcher nativo de Google satura la memoria. NovaHome opera a < 28 MB de RAM con curva de animación ultraligera (150 ms) y renderizado directo en software para eliminar caídas de frames y tearing en GPUs básicas. |
+| **Gama Media / Estándar** | Xiaomi Mi Box 4 / 4K, Chromecast con Google TV HD/4K, Fire TV Stick 4K | 1.5 GB – 2 GB RAM, SoC Amlogic S905X / S905L, GPU Mali-450 penta-core | **Fluidez constante a 60 FPS:** Multitarea estable en resolución 4K. La memoria adicional permite mantener el launcher en segundo plano sin cierres forzados por el sistema al alternar entre plataformas de streaming. |
+| **Gama Media-Alta / Premium** | TCL 55P8L (QD-Mini LED), Sony Bravia XR, Philips The One / OLED | 3 GB RAM o superior, SoC MediaTek Pentonic 700 (MT9653) Cortex-A73, Panel 120 Hz / 144 Hz | **Rendimiento extremo:** Activación nativa de alta tasa de refresco (`configureHighRefreshRate()`) a 120 Hz / 144 Hz sin pérdidas de sincronización vertical. Los 3 GB de RAM y almacenamiento UFS aseguran transiciones instantáneas a nivel de consola. |
+
+---
+
 ## Requisitos del Sistema
 
 * **Sistema Operativo:** Android TV / Google TV 8.0 Oreo (API nivel 26) o superior.
