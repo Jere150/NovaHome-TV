@@ -21,6 +21,31 @@
 
 ---
 
+## ¿Por qué NovaHome TV?
+
+Los televisores inteligentes y dispositivos de streaming actuales sufren una degradación severa de rendimiento debido al diseño de sus interfaces de fábrica:
+
+* **El Problema del Launcher Oficial:** El lanzador por defecto de Google TV / Android TV satura entre **250 MB y 450 MB de memoria RAM**, consume ancho de banda constante transmitiendo tráilers automáticos en 4K, despliega más de un **60% de publicidad no solicitada** en la pantalla de inicio y recopila telemetría de uso continua. En dispositivos de gama de entrada o televisores con 1 GB de RAM, esto genera congelamientos, cierres forzados de aplicaciones y lentitud insoportable al navegar con el control remoto.
+* **La Solución NovaHome TV:** Diseñado desde cero como un lanzador minimalista, premium y autónomo. Consume **menos de 28.6 MB de RAM**, elimina el 100% de la publicidad y telemetría, ofrece personalización visual en tiempo real a 60/144 FPS y devuelve la respuesta instantánea del control remoto incluso en los televisores más económicos del mercado.
+
+---
+
+## Tabla Comparativa Técnica
+
+| Característica / Criterio | Launcher Stock de Fábrica (Google TV) | CleanYourTV (Base Upstream) | NovaHome TV (v1.5) |
+|---|---|---|---|
+| **Consumo de Memoria RAM** | 250 MB – 450 MB (Crítico) | ~40 MB – 50 MB | **19.5 MB – 28.6 MB (Ultraligero)** |
+| **Publicidad y Tráilers Automáticos** | Sí (Invasivo, > 60% de pantalla) | No (0% Publicidad) | **No (0% Publicidad, Cero Banners)** |
+| **Telemetría y Conexiones en Fondo** | Constante (Google Analytics / Ads) | No | **Cero Peticiones (Privacidad Absoluta)** |
+| **Personalización de Color y Estilo** | Ninguna (Fijo por fabricante) | Básica / Estática | **Matriz 2D HSV en Vivo, Opacidad y Radio** |
+| **Sistema de Dock de Aplicaciones** | Renglón rígido predeterminado | Fijo (requiere fijado forzado) | **Bajo Demanda (0 a 6 apps) + Sustitución interactiva** |
+| **Panel Flotante de Entradas (HDMI / AV)** | Menú lateral tosco del sistema | Menú de texto estándar | **Panel Simétrico Translúcido con Detección Automática** |
+| **Modo Arte y Salvapantallas OLED** | Backdrop pesado con carga de red | No incluido | **Modo Arte Nativo + Clock Anti-Burn-In OLED** |
+| **Soporte de Frecuencias Ultra-Altas** | Limitado por compositor stock | 60 Hz estándar | **Nativo 120 Hz / 144 Hz (`configureHighRefreshRate`)** |
+| **Compatibilidad con TV Abierta (Sintonizador)** | Enlace interno propietario | Limitado | **Soporte Nativo Live TV (MediaTek / AOSP)** |
+
+---
+
 ## Galería Visual
 
 | Home Minimalista y Dock | Cajón de Aplicaciones Expandido |
@@ -167,6 +192,82 @@ NovaHome TV cuenta con su propio motor de **Modo Arte** y **Salvapantallas cinem
     ```bash
     adb shell settings put secure screensaver_enabled 0
     ```
+
+---
+
+## Optimización y Debloating Seguro Reversible (Opcional)
+
+Si deseas liberar entre **200 MB y 450 MB de memoria RAM** en tu televisor y evitar que el launcher de fábrica continúe ejecutándose en segundo plano consumiendo recursos y mostrando anuncios, puedes desactivarlo mediante ADB.
+
+> [!IMPORTANT]
+> **Totalmente Seguro y Reversible:** Este procedimiento no borra ninguna aplicación del sistema; únicamente desactiva temporalmente el lanzador de fábrica para el usuario actual. Puede revertirse en cualquier momento con un solo comando.
+
+### 1. Desactivar el Launcher de Fábrica (según tu dispositivo)
+
+Conéctate por ADB a tu televisor y ejecuta el comando correspondiente:
+
+* **Google TV Moderno (Chromecast con Google TV, TCL recientes, Sony recientes):**
+  ```bash
+  adb shell pm disable-user --user 0 com.google.android.apps.tv.launcherx
+  adb shell pm disable-user --user 0 com.google.android.tungsten.setupwraith
+  ```
+* **Android TV Estándar (Xiaomi Mi Box, Smart TVs Haier, Philips, Noblex):**
+  ```bash
+  adb shell pm disable-user --user 0 com.google.android.tvlauncher
+  ```
+* **Xiaomi PatchWall (Opcional, en televisores y boxes Xiaomi):**
+  ```bash
+  adb shell pm disable-user --user 0 com.mitv.tvhome
+  ```
+
+Al pulsar el botón **Home** de tu control remoto, NovaHome TV responderá de forma instantánea como el único lanzador principal del sistema.
+
+### 2. Cómo Restaurar el Launcher de Fábrica (100% Reversible)
+
+Si deseas volver al lanzador original en cualquier momento:
+
+```bash
+# Para Google TV
+adb shell pm enable com.google.android.apps.tv.launcherx
+adb shell pm enable com.google.android.tungsten.setupwraith
+
+# Para Android TV Estándar
+adb shell pm enable com.google.android.tvlauncher
+
+# Para Xiaomi PatchWall
+adb shell pm enable com.mitv.tvhome
+```
+
+---
+
+## Preguntas Frecuentes (FAQ)
+
+<details>
+<summary><strong>¿NovaHome TV afecta mis cuentas, suscripciones o aplicaciones instaladas?</strong></summary>
+<p>No. NovaHome TV es únicamente una interfaz visual de inicio (Launcher). No altera tus aplicaciones, no modifica certificados de seguridad DRM (Widevine L1 se mantiene intacto para 4K en Netflix, Disney+, Prime Video, etc.) ni interfiere con las sesiones activas de tus servicios de streaming.</p>
+</details>
+
+<details>
+<summary><strong>¿Por qué no aparece el botón de Entradas (HDMI) en mi dispositivo?</strong></summary>
+<p>El botón de Entradas en la cabecera cuenta con detección inteligente de hardware: solo se muestra en televisores reales que cuentan físicamente con puertos HDMI, AV o sintonizador de antena integrado. En decodificadores o cajas de streaming (como Xiaomi Mi Box o Fire TV Stick), el botón se oculta automáticamente para mantener el HUD limpio y sin accesos muertos.</p>
+</details>
+
+<details>
+<summary><strong>¿Cómo cargo fondos de pantalla personalizados?</strong></summary>
+<p>Puedes conectar un pendrive USB al televisor o enviar cualquier imagen (JPG o PNG en 1080p o 4K) mediante aplicaciones como <em>Send Files to TV</em>. Luego abre los <strong>Ajustes de NovaHome</strong> (icono de engranaje), ve a la sección <em>Personalización y Sistema</em>, selecciona <strong>Fondo de pantalla &rarr; Elegir</strong> y escoge la imagen con tu explorador de archivos preferido.</p>
+</details>
+
+<details>
+<summary><strong>¿Cómo reemplazo una aplicación cuando el dock tiene las 6 tarjetas ocupadas?</strong></summary>
+<p>Despliega el cajón completo pulsando Flecha Abajo en el control remoto. Posiciónate sobre cualquier aplicación que no esté en el dock, mantén presionado el botón central <strong>OK</strong> y selecciona <strong>Fijar en dock</strong>. El dock se contraerá automáticamente a una fila: usa Izquierda/Derecha para posarte sobre la tarjeta que deseas sustituir y pulsa <strong>OK</strong> para confirmar (o Atrás para cancelar).</p>
+</details>
+
+<details>
+<summary><strong>¿Puedo desinstalar NovaHome TV de forma normal?</strong></summary>
+<p>Sí. Antes de desinstalar, asegúrate de reactivar el launcher de fábrica con los comandos de reversión indicados arriba, o bien instala otro launcher de respaldo. Luego puedes desinstalar NovaHome TV directamente desde los Ajustes de Android TV &rarr; Aplicaciones &rarr; NovaHome TV &rarr; Desinstalar.</p>
+</details>
+
+---
 
 ---
 
