@@ -203,8 +203,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private static final int REQUEST_PICK_WALLPAPER = 1001;
     private static final int REQUEST_PICK_SCREENSAVER_HTML = 1002;
     private boolean isMovingDockCard = false;
+    private boolean isReplacingDockCard = false;
+    private String replacingNewPkg = null;
+    private String replacingNewLabel = null;
+    private int replacingCurrentPos = 0;
+    private boolean wasExpandedBeforeReplace = false;
+    private int replaceReturnPosition = 0;
+    private int forcedExpandFocusPos = -1;
     private boolean isQuickSettingsOpen = false;
     private Dialog currentQuickSettingsDialog = null;
+    private Dialog currentInputsDialog = null;
     private PopupWindow openPopup;
     private String movingDockPkg = null;
     private int movingDockPos = -1;
@@ -213,7 +221,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private final Handler artModeHandler = new Handler(Looper.getMainLooper());
     private final Runnable artModeFadeOut = () -> {
         if (!isFinishing() && screensaverView != null && !screensaverView.isActive()) {
-            if (openPopup != null || isMovingDockCard || isQuickSettingsOpen) return;
+            if (openPopup != null || isMovingDockCard || isReplacingDockCard || isQuickSettingsOpen) return;
             if (grid != null) grid.animate().alpha(0f).setDuration(600).start();
             if (glass != null) {
                 if (springX != null) springX.cancel();
@@ -233,7 +241,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private final Handler screensaverHandler = new Handler(Looper.getMainLooper());
     private final Runnable screensaverTrigger = () -> {
         if (!isFinishing() && screensaverView != null && !screensaverView.isActive()) {
-            if (openPopup != null || isMovingDockCard || isQuickSettingsOpen) return;
+            if (openPopup != null || isMovingDockCard || isReplacingDockCard || isQuickSettingsOpen) return;
             if (ThemeManager.get(this).isScreensaverEnabled()) {
                 screensaverView.activate();
             }
@@ -277,7 +285,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             scrimView.animate().alpha(1f).setDuration(250).start();
         }
 
-        if (isQuickSettingsOpen || openPopup != null || isMovingDockCard) return;
+        if (isQuickSettingsOpen || openPopup != null || isMovingDockCard || isReplacingDockCard) return;
 
         int fadeSec = ThemeManager.get(this).getArtModeFadeSeconds();
         if (fadeSec > 0) {
@@ -571,7 +579,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         hideGlass();
 
         // Preservar la posicion enfocada actual ANTES de setExpanded
-        final int preservedPos = Math.max(0, getCurrentFocusedPosition());
+        final int preservedPos = (forcedExpandFocusPos >= 0) ? forcedExpandFocusPos : Math.max(0, getCurrentFocusedPosition());
+        forcedExpandFocusPos = -1;
 
         isDockExpanded = true;
         grid.setVisibility(View.VISIBLE);
@@ -608,7 +617,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         grid.setPadding(horizPad, targetPad, horizPad, (int) (12 * density));
         grid.invalidateItemDecorations();
 
-        grid.setLayerType(View.LAYER_TYPE_HARDWARE, null);
         grid.setTranslationY(deltaY);
 
         grid.post(() -> {
@@ -634,7 +642,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 public void onAnimationEnd(Animator animation) {
                     if (grid != null) {
                         grid.setTranslationY(0f);
-                        grid.setLayerType(View.LAYER_TYPE_NONE, null);
                     }
                     isAnimatingDock = false;
                     if (glass != null) glass.setSuppressed(false);
@@ -672,7 +679,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         // Guardar foco actual ANTES de colapsar
         int curPos = getCurrentFocusedPosition();
-        final int targetRow1Pos = (curPos >= 0 && curPos < k) ? curPos : 0;
+        final int targetRow1Pos = isReplacingDockCard ? replacingCurrentPos : ((curPos >= 0 && curPos < k) ? curPos : 0);
 
         isDockExpanded = false;
         grid.setClipToPadding(false);
@@ -704,8 +711,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         float deltaY = targetPad - grid.getPaddingTop();
 
-        grid.setLayerType(View.LAYER_TYPE_HARDWARE, null);
-
         int childCount = grid.getChildCount();
         for (int i = 0; i < childCount; i++) {
             View child = grid.getChildAt(i);
@@ -727,7 +732,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             public void onAnimationEnd(Animator animation) {
                 if (grid != null) {
                     grid.setTranslationY(0f);
-                    grid.setLayerType(View.LAYER_TYPE_NONE, null);
                     if (grid.getLayoutManager() instanceof GridLayoutManager) {
                         ((GridLayoutManager) grid.getLayoutManager()).setSpanCount(k);
                         ((GridLayoutManager) grid.getLayoutManager()).scrollToPositionWithOffset(0, 0);
@@ -763,10 +767,14 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                         } else {
                             focusTile(targetRow1Pos);
                         }
-                        setHudFocusable(true);
+                        if (!isReplacingDockCard) {
+                            setHudFocusable(true);
+                        }
                     });
                 } else {
-                    setHudFocusable(true);
+                    if (!isReplacingDockCard) {
+                        setHudFocusable(true);
+                    }
                 }
             }
         });
@@ -2128,6 +2136,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onPause() {
         super.onPause();
+        if (currentInputsDialog != null && currentInputsDialog.isShowing()) {
+            currentInputsDialog.dismiss();
+            currentInputsDialog = null;
+        }
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         resumed = false;
         artModeHandler.removeCallbacks(artModeFadeOut);
@@ -2246,6 +2258,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (currentInputsDialog != null && currentInputsDialog.isShowing()) {
+            currentInputsDialog.dismiss();
+            currentInputsDialog = null;
+        }
         ViewTreeObserver tree = getWindow().getDecorView().getViewTreeObserver();
         if (tree.isAlive()) tree.removeOnGlobalFocusChangeListener(glassFocusListener);
         if (root != null && root.getViewTreeObserver().isAlive()) {
@@ -2353,6 +2369,25 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 return true;
             } else if (code == KeyEvent.KEYCODE_BACK || code == KeyEvent.KEYCODE_ESCAPE) {
                 if (down) cancelFreeCardMove();
+                return true;
+            }
+            return true;
+        }
+        if (isReplacingDockCard) {
+            boolean down = event.getAction() == KeyEvent.ACTION_DOWN;
+            int code = event.getKeyCode();
+            if (code == KeyEvent.KEYCODE_DPAD_LEFT) {
+                if (down) replaceDockCardLeft();
+                return true;
+            } else if (code == KeyEvent.KEYCODE_DPAD_RIGHT) {
+                if (down) replaceDockCardRight();
+                return true;
+            } else if (code == KeyEvent.KEYCODE_DPAD_CENTER || code == KeyEvent.KEYCODE_ENTER
+                    || code == KeyEvent.KEYCODE_NUMPAD_ENTER || code == KeyEvent.KEYCODE_BUTTON_A) {
+                if (down) confirmReplaceDockCard();
+                return true;
+            } else if (code == KeyEvent.KEYCODE_BACK || code == KeyEvent.KEYCODE_ESCAPE) {
+                if (down) cancelReplaceDockCard();
                 return true;
             }
             return true;
@@ -2725,6 +2760,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         }
         if (isMovingDockCard) {
             cancelFreeCardMove();
+            return;
+        }
+        if (isReplacingDockCard) {
+            cancelReplaceDockCard();
             return;
         }
         if (isDockExpanded) {
@@ -4290,47 +4329,131 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     /** Dropdown menu under the Inputs pill: HDMI ports (with connection state), AV and Live TV. */
     private void showInputs() {
-        // A configured source panel and no Live TV row to offer next to it: the panel is the whole menu.
-        // The BYINTEK U4 needs this, as its TvInputManager lists three HDMI ports and an AV input it doesn't have.
         List<CoocaaSources.Source> coocaa = coocaaSources ? CoocaaSources.list(this) : Collections.emptyList();
         if (coocaa.isEmpty() && !sourcePanelService.isEmpty() && liveTvIntent() == null) {
             openSourcePanel();
             return;
         }
-        // top_menu: the pill is gone, so the list hangs under the gear, growing inward from the right.
-        // Read the switch, not the pill: show_inputs_pill=false hides the pill too, and there the list
-        // keeps its usual place.
-        boolean underGear = topMenu;
-        View anchor = findViewById(underGear ? R.id.btnSettings : R.id.btnInputs);
-        View panel = getLayoutInflater().inflate(R.layout.popup_inputs, root, false);
-        LinearLayout rows = panel.findViewById(R.id.rows);
 
-        // Compact: as wide as the Inputs pill (a touch wider so "HDMI 1" fits), hanging right below it.
-        int width = Math.max(anchor.getWidth(), (int) (150 * density));
-        final PopupWindow popup = glassPopup(panel, width);
+        if (currentInputsDialog != null && currentInputsDialog.isShowing()) {
+            currentInputsDialog.dismiss();
+            currentInputsDialog = null;
+            return;
+        }
+
+        float density = getResources().getDisplayMetrics().density;
+        int screenW = getResources().getDisplayMetrics().widthPixels;
+        int screenH = getResources().getDisplayMetrics().heightPixels;
+        int panelWidth = (int) (310 * density);
+
+        int defaultInnerW = screenW - (int) (20 * density);
+        int tileW = AppAdapter.tileWidthPx(defaultInnerW, 6, density);
+        int cardH = AppAdapter.tileHeightPx(tileW);
+        int dockCapsuleTop = screenH - (int) (52 * density) - cardH;
+        int panelTopMargin = (int) (14 * density);
+        int panelBottom = dockCapsuleTop - (int) (12 * density);
+        int panelMaxHeight = Math.max((int) (200 * density), panelBottom - panelTopMargin);
+
+        float fixedRightMargin;
+        if (grid != null && grid.getWidth() > 0) {
+            int[] loc = new int[2];
+            grid.getLocationOnScreen(loc);
+            int gridW = grid.getWidth();
+            int innerW = gridW - (int) (20 * density);
+            int cellW = innerW / 6;
+            int gridTileW = AppAdapter.tileWidthPx(innerW, 6, density);
+            float span6Width = 5 * cellW + gridTileW;
+            float sidePad = 16 * density;
+            float fixedCapsuleWidth = span6Width + 2 * sidePad;
+            float fixedLeft = (gridW - fixedCapsuleWidth) / 2f;
+            float fixedRight = fixedLeft + fixedCapsuleWidth;
+            float fixedRightScreen = loc[0] + fixedRight;
+            fixedRightMargin = Math.max(0f, screenW - fixedRightScreen);
+        } else {
+            fixedRightMargin = DockDecoration.getFixedCapsuleScreenRightMargin(screenW, density);
+        }
+
+        Dialog dialog = new Dialog(this, android.R.style.Theme_Translucent_NoTitleBar);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        currentInputsDialog = dialog;
+
+        Window window = dialog.getWindow();
+        if (window != null) {
+            window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
+            window.setGravity(Gravity.END | Gravity.TOP);
+            WindowManager.LayoutParams lp = window.getAttributes();
+            lp.x = (int) Math.round(fixedRightMargin);
+            lp.y = panelTopMargin;
+            lp.width = panelWidth;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(lp);
+        }
+
+        ThemeManager tm = ThemeManager.get(this);
+        int glowColor = tm.getParsedGlowColor();
+        int baseColor = ThemeManager.parseColorSafely(tm.getDockBackgroundColorHex(), Color.parseColor("#141824"));
+        int r = Color.red(baseColor);
+        int g = Color.green(baseColor);
+        int b = Color.blue(baseColor);
+        int panelColor = Color.argb((int) (0.92f * 255), r, g, b);
+
+        LinearLayout rootPanel = new LinearLayout(this);
+        rootPanel.setOrientation(LinearLayout.VERTICAL);
+        rootPanel.setLayoutParams(new ViewGroup.LayoutParams(panelWidth, ViewGroup.LayoutParams.WRAP_CONTENT));
+        rootPanel.setClipToOutline(true);
+
+        GradientDrawable panelBg = new GradientDrawable();
+        panelBg.setColor(panelColor);
+        panelBg.setCornerRadius(14 * density);
+        int borderColor = tm.getParsedBorderColor();
+        panelBg.setStroke((int) Math.max(1, density), (borderColor & 0x00FFFFFF) | 0x44000000);
+        rootPanel.setBackground(panelBg);
+
+        int padH = (int) (18 * density);
+        int padTop = (int) (16 * density);
+        rootPanel.setPadding(padH, padTop, padH, (int) (16 * density));
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText(getString(R.string.inputs));
+        tvTitle.setTextColor(Color.WHITE);
+        tvTitle.setTextSize(19f);
+        tvTitle.setTypeface(android.graphics.Typeface.DEFAULT_BOLD);
+        tvTitle.setSingleLine(true);
+        rootPanel.addView(tvTitle);
+
+        TextView tvSubtitle = new TextView(this);
+        tvSubtitle.setText(getString(R.string.choose_input));
+        tvSubtitle.setTextColor(Color.parseColor("#80FFFFFF"));
+        tvSubtitle.setTextSize(11f);
+        tvSubtitle.setPadding(0, (int) (2 * density), 0, (int) (12 * density));
+        rootPanel.addView(tvSubtitle);
+
+        android.widget.ScrollView scroll = new android.widget.ScrollView(this);
+        scroll.setVerticalScrollBarEnabled(false);
+        scroll.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        LinearLayout rows = new LinearLayout(this);
+        rows.setOrientation(LinearLayout.VERTICAL);
+        scroll.addView(rows);
+
+        LinearLayout.LayoutParams lpScroll = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        rootPanel.addView(scroll, lpScroll);
 
         TvInputManager tim = (TvInputManager) getSystemService(TV_INPUT_SERVICE);
-        // inputs_connected_only: ports without a connected device and the AV jacks fold behind a "More inputs" row.
         boolean connectedOnly = inputsConnectedOnly;
         List<View> folded = new ArrayList<>();
         boolean sawNonHdmi = false;
-        // An explicit root URI asks the Live TV app to leave any HDMI source selected by its own UI.
         boolean rootChannel = TvContract.Channels.CONTENT_URI.toString().equals(liveTvInputId);
         String tunerId = null;
         boolean tunerIsHw = false;
         boolean tunerIsAnalog = false;
         if (tim != null) {
             List<TvInputInfo> inputs = new ArrayList<>(tim.getTvInputList());
-            // HDMI ports first in port order, then AV and the rest.
-            Collections.sort(inputs, (a, b) -> {
-                boolean ha = a.getType() == TvInputInfo.TYPE_HDMI, hb = b.getType() == TvInputInfo.TYPE_HDMI;
+            Collections.sort(inputs, (inpA, inpB) -> {
+                boolean ha = inpA.getType() == TvInputInfo.TYPE_HDMI, hb = inpB.getType() == TvInputInfo.TYPE_HDMI;
                 if (ha != hb) return ha ? -1 : 1;
-                return String.valueOf(a.loadLabel(this)).compareToIgnoreCase(String.valueOf(b.loadLabel(this)));
+                return String.valueOf(inpA.loadLabel(this)).compareToIgnoreCase(String.valueOf(inpB.loadLabel(this)));
             });
-            // An HDMI-CEC device (an Apple TV, a soundbar) gets an input of its own whose parent is the
-            // port it sits on, so the port and the device would each get a row (Vestel MT7332: "HDMI 1"
-            // and "HDMI Apple TV"). The device takes its port's row instead, and a bare port is listed
-            // only when nothing on it speaks CEC.
             Set<String> inputIds = new HashSet<>();
             for (TvInputInfo info : inputs) inputIds.add(info.getId());
             Map<String, List<TvInputInfo>> cecDevices = new HashMap<>();
@@ -4342,8 +4465,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 if (onPort == null) cecDevices.put(parent, onPort = new ArrayList<>());
                 onPort.add(info);
             }
-            // Some TVs (Sony) report every HDMI port as connected whether or not anything is plugged in,
-            // so drop the HDMI status then. A TV with every port really in use loses it too.
             int hdmiPorts = 0, hdmiConnected = 0;
             for (TvInputInfo info : inputs) {
                 if (!info.isPassthroughInput() || info.getType() != TvInputInfo.TYPE_HDMI) continue;
@@ -4351,18 +4472,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 hdmiPorts++;
                 if (tim.getInputState(info.getId()) == TvInputManager.INPUT_STATE_CONNECTED) hdmiConnected++;
             }
-            // inputs_cec_state_only: the TV puts port states on the wrong port (TCL UnionTV, Android 9), so
-            // ports show none, and a CEC device row shows its own state, which the CEC bus keeps right.
             boolean hdmiStateBogus = inputsCecStateOnly || (hdmiPorts > 1 && hdmiConnected == hdmiPorts);
             for (TvInputInfo info : inputs) {
                 if (info.getType() == TvInputInfo.TYPE_TUNER
                         && (info.getServiceInfo().applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0
                         && (liveTvInputId.isEmpty() || rootChannel || liveTvInputId.equals(info.getId()))) {
-                    // Prefer a hardware tuner: the framework names those ".../HW<n>". System apps such as
-                    // AirPlay also register software inputs of type TUNER and may sort first (seen on TCL G05).
-                    // Among tuners of the same kind, skip an analog input when another is present.
-                    // MediaTek names them AnalogInputService and TunerInputService; alphabetical order
-                    // would pick the analog one, and Live TV then opens a dead ATV source.
                     boolean hw = info.getId().matches(".*/HW\\d+$");
                     boolean analog = info.getId().toLowerCase(Locale.ROOT).contains("analog");
                     boolean better = tunerId == null
@@ -4376,11 +4490,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                         tunerIsAnalog = analog;
                     }
                 }
-                // Inputs hidden in the TV's Settings > Inputs stay out of the menu too.
                 if (!info.isPassthroughInput() || info.isHidden(this)) continue;
-                // input_sources can leave out ports the board reports but the set does not have ("HW8=-").
                 if (Integer.valueOf(-1).equals(mappedSource(info.getId()))) continue;
-                // A CEC device's row is added with its port, below.
                 if (info.getParentId() != null && inputIds.contains(info.getParentId())) continue;
                 CharSequence l = info.loadLabel(this);
                 String label = l == null ? info.getId() : l.toString();
@@ -4389,78 +4500,55 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                 CharSequence custom = InputNames.tidy(info.loadCustomLabel(this));
                 boolean named = custom != null && custom.length() > 0 && !custom.toString().equals(label);
                 if (!hdmi && rows.getChildCount() > 0 && !sawNonHdmi) {
-                    View line = addSeparator(rows);
+                    View line = addStyledSeparator(rows, density);
                     if (connectedOnly) fold(line, folded);
                 }
                 if (!hdmi) sawNonHdmi = true;
                 List<TvInputInfo> devices = cecDevices.get(info.getId());
                 if (devices != null) {
-                    // "Apple TV · HDMI 1": the device's own name (or the one given to it or to its port in
-                    // Settings > Inputs), then the port. Opening the device's input also makes it the CEC
-                    // active source, which wakes it.
                     for (TvInputInfo device : devices) {
                         CharSequence name = InputNames.tidy(device.loadCustomLabel(this));
                         if (name == null || name.length() == 0) name = named ? custom : device.loadLabel(this);
                         String deviceLabel = name == null || name.length() == 0 ? label : name + " \u00B7 " + label;
                         final String deviceId = device.getId();
                         int state = hdmiStateBogus && !inputsCecStateOnly ? -1 : tim.getInputState(deviceId);
-                        View row = addInputRow(rows, popup, R.drawable.ic_input, deviceLabel, state, () -> openInput(deviceId));
+                        View row = addStyledInputRow(rows, dialog, R.drawable.ic_input, deviceLabel, state, density, glowColor, () -> openInput(deviceId));
                         if (connectedOnly && InputFold.folds(true, state)) fold(row, folded);
                     }
                     continue;
                 }
-                // The name given in Settings > Inputs (e.g. "MacBook Pro") goes first, the port after it.
                 if (named) label = custom + " \u00B7 " + label;
                 final String id = info.getId();
-                // Analog AV jacks have no hotplug detection, and some TVs report them as always connected
-                // (TCL Smart TV Pro G03 says "Connected" with nothing plugged in), so AV rows show no state.
                 int state = !hdmi || hdmiStateBogus ? -1 : tim.getInputState(id);
-                View row = addInputRow(rows, popup, hdmi ? R.drawable.ic_input : R.drawable.ic_av, label, state,
+                View row = addStyledInputRow(rows, dialog, hdmi ? R.drawable.ic_input : R.drawable.ic_av, label, state, density, glowColor,
                         () -> openInput(id));
                 if (connectedOnly && InputFold.folds(hdmi, state)) fold(row, folded);
             }
         }
         if (!folded.isEmpty()) {
-            View more = getLayoutInflater().inflate(R.layout.item_input, rows, false);
-            ((ImageView) more.findViewById(R.id.icon)).setImageResource(R.drawable.ic_input);
-            ((TextView) more.findViewById(R.id.title)).setText(R.string.more_inputs);
-            more.findViewById(R.id.status).setVisibility(View.GONE);
-            more.findViewById(R.id.dot).setVisibility(View.GONE);
-            more.setOnClickListener(v -> {
+            addStyledInputRow(rows, dialog, R.drawable.ic_input, getString(R.string.more_inputs), -1, density, glowColor, () -> {
                 for (View f : folded) f.setVisibility(View.VISIBLE);
-                rows.removeView(more);
                 for (View f : folded) {
                     if (f.isFocusable()) { f.requestFocus(); break; }
                 }
             });
-            rows.addView(more);
         }
-        // Coocaa OS registers nothing with TvInputManager; com.skyworth.tv lists its sources instead.
         if (rows.getChildCount() == 0) {
             for (CoocaaSources.Source s : coocaa) {
                 int icon = "HDMI".equals(s.name) ? R.drawable.ic_input
                         : "VOD".equals(s.name) ? R.drawable.ic_livetv : R.drawable.ic_av;
-                addInputRow(rows, popup, icon, s.label, -1, () -> {
+                addStyledInputRow(rows, dialog, icon, s.label, -1, density, glowColor, () -> {
                     if (!CoocaaSources.open(this, s)) {
                         Toast.makeText(this, R.string.not_available, Toast.LENGTH_SHORT).show();
                     }
                 });
             }
         }
-        // Nothing to list where there is no TvInputManager: the TV's own source panel switches inputs.
         if (rows.getChildCount() == 0 && !sourcePanelService.isEmpty()) {
-            addInputRow(rows, popup, R.drawable.ic_input, getString(R.string.inputs), -1, this::openSourcePanel);
+            addStyledInputRow(rows, dialog, R.drawable.ic_input, getString(R.string.inputs), -1, density, glowColor, this::openSourcePanel);
         }
         Intent liveTv = liveTvIntent();
         if (liveTv != null && tunerId != null) {
-            // Tune that input only when the Live TV package itself handles the URI.
-            // The unrestricted input player also resolves it (that is how HDMI opens), but on the
-            // AIWA AI PONT SA that player stays black, and the Live TV package does not handle the
-            // URI at all, which used to toast "Not available on this TV". Keep the leanback activity
-            // then: it is the same path as the Live TV tile. Do not drop the package restriction.
-            // An explicit tuner uses its channel collection (e.g. DVB-S rather than DVB-T/C).
-            // Keep the legacy passthrough route for automatic selection: some OEM players need it.
-            // If the configured input is absent, tunerId stays null and the app opens normally.
             boolean configured = !liveTvInputId.isEmpty() && !rootChannel;
             Intent tuned = new Intent(Intent.ACTION_VIEW)
                     .setDataAndType(configured ? TvContract.buildChannelsUriForInput(tunerId)
@@ -4469,33 +4557,126 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     .setPackage(liveTvPkg);
             ComponentName handler = tuned.resolveActivity(getPackageManager());
             if (handler != null) {
-                // On some MediaTek sets the tuner passthrough URI leaves the app's HDMI source selected.
-                // The stock launcher addresses the same activity with the root channel URI instead (#1941).
                 liveTv = rootChannel
                         ? new Intent(Intent.ACTION_VIEW).setData(TvContract.Channels.CONTENT_URI).setComponent(handler)
                         : tuned;
             }
         }
         if (liveTv != null) {
-            if (rows.getChildCount() > 0) addSeparator(rows);
+            if (rows.getChildCount() > 0) addStyledSeparator(rows, density);
             final Intent liveTvIntent = liveTv;
-            addInputRow(rows, popup, R.drawable.ic_livetv, getString(R.string.live_tv), -1, () -> open(liveTvIntent));
+            addStyledInputRow(rows, dialog, R.drawable.ic_livetv, getString(R.string.live_tv), -1, density, glowColor, () -> open(liveTvIntent));
         }
         if (rows.getChildCount() == 0) {
             Toast.makeText(this, R.string.no_inputs, Toast.LENGTH_SHORT).show();
+            dialog.dismiss();
             return;
         }
 
-        // Fit the widest row: TVs that report a status on every port (Sony) would otherwise squeeze the names out.
-        panel.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
-        popup.setWidth(Math.max(width, Math.min(panel.getMeasuredWidth(), (int) (360 * density))));
-
-        int alignment = getResources().getBoolean(R.bool.rtl_menu_bar) != underGear ? Gravity.END : Gravity.START;
-        dropIn(popup, panel, anchor, alignment);
-        for (int i = 0; i < rows.getChildCount(); i++) {
-            View child = rows.getChildAt(i);
-            if (child.getVisibility() == View.VISIBLE && child.isFocusable()) { child.requestFocus(); break; }
+        dialog.setOnDismissListener(d -> {
+            currentInputsDialog = null;
+            if (btnInputs != null && btnInputs.getVisibility() == View.VISIBLE) {
+                btnInputs.requestFocus();
+            }
+        });
+        dialog.setContentView(rootPanel);
+        dialog.show();
+        if (rows.getChildCount() > 0) {
+            rows.getChildAt(0).requestFocus();
         }
+    }
+
+    private View addStyledSeparator(LinearLayout rows, float density) {
+        View line = new View(this);
+        line.setBackgroundColor(0x1FFFFFFF);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, (int) Math.max(1, density));
+        int m = (int) (6 * density);
+        lp.setMargins(0, m, 0, m);
+        rows.addView(line, lp);
+        return line;
+    }
+
+    private View addStyledInputRow(LinearLayout rows, Dialog dialog, int iconRes, String title, int state, float density, int glowColor, Runnable action) {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        row.setFocusable(true);
+        row.setClickable(true);
+        int padRowH = (int) (14 * density);
+        int padRowV = (int) (9 * density);
+        row.setPadding(padRowH, padRowV, padRowH, padRowV);
+
+        GradientDrawable rowBg = new GradientDrawable();
+        rowBg.setColor(Color.parseColor("#1C2130"));
+        rowBg.setCornerRadius(8 * density);
+        rowBg.setStroke((int) Math.max(1, density), Color.parseColor("#262D3E"));
+        row.setBackground(rowBg);
+
+        ImageView ivIcon = new ImageView(this);
+        int iconSize = (int) (20 * density);
+        ivIcon.setImageResource(iconRes);
+        ivIcon.setImageTintList(ColorStateList.valueOf(Color.WHITE));
+        ivIcon.setLayoutParams(new LinearLayout.LayoutParams(iconSize, iconSize));
+        row.addView(ivIcon);
+
+        TextView tvTitle = new TextView(this);
+        tvTitle.setText(title);
+        tvTitle.setTextColor(Color.WHITE);
+        tvTitle.setTextSize(13.5f);
+        tvTitle.setSingleLine(true);
+        tvTitle.setEllipsize(TextUtils.TruncateAt.END);
+        tvTitle.setPadding((int) (10 * density), 0, (int) (8 * density), 0);
+        row.addView(tvTitle, new LinearLayout.LayoutParams(0, ViewGroup.LayoutParams.WRAP_CONTENT, 1f));
+
+        if (state == TvInputManager.INPUT_STATE_CONNECTED) {
+            View dot = new View(this);
+            int dotSize = (int) (7 * density);
+            GradientDrawable dotBg = new GradientDrawable();
+            dotBg.setShape(GradientDrawable.OVAL);
+            dotBg.setColor(Color.parseColor("#4ADE80"));
+            dot.setBackground(dotBg);
+            LinearLayout.LayoutParams lpDot = new LinearLayout.LayoutParams(dotSize, dotSize);
+            lpDot.setMarginEnd((int) (6 * density));
+            row.addView(dot, lpDot);
+
+            TextView tvStatus = new TextView(this);
+            tvStatus.setText(getString(R.string.connected));
+            tvStatus.setTextColor(Color.parseColor("#4ADE80"));
+            tvStatus.setTextSize(11f);
+            row.addView(tvStatus);
+        } else if (state == TvInputManager.INPUT_STATE_DISCONNECTED) {
+            TextView tvStatus = new TextView(this);
+            tvStatus.setText(getString(R.string.not_connected));
+            tvStatus.setTextColor(Color.parseColor("#66FFFFFF"));
+            tvStatus.setTextSize(11f);
+            row.addView(tvStatus);
+        }
+
+        row.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                rowBg.setColor((glowColor & 0x00FFFFFF) | 0x33000000);
+                rowBg.setStroke((int) (2 * density), glowColor);
+                row.setScaleX(1.02f);
+                row.setScaleY(1.02f);
+            } else {
+                rowBg.setColor(Color.parseColor("#1C2130"));
+                rowBg.setStroke((int) Math.max(1, density), Color.parseColor("#262D3E"));
+                row.setScaleX(1.0f);
+                row.setScaleY(1.0f);
+            }
+        });
+
+        row.setOnClickListener(v -> {
+            dialog.dismiss();
+            if (action != null) action.run();
+        });
+
+        LinearLayout.LayoutParams lpRow = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        lpRow.setMargins(0, (int) (3 * density), 0, (int) (3 * density));
+        rows.addView(row, lpRow);
+        return row;
     }
 
     private static void fold(View view, List<View> folded) {
@@ -4720,7 +4901,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     public void onTileLongPress(int position, View card) {
-        if (reordering || isMovingDockCard || openPopup != null) return;
+        if (reordering || isMovingDockCard || isReplacingDockCard || openPopup != null) return;
         String key = adapter.keyAt(position);
         String pkg = adapter.packageAt(position);
         if (key == null || pkg == null || pkg.equals(getPackageName())) return;
@@ -4743,6 +4924,12 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     public void onStartMove(String movePkg, int pos) {
                         openPopup = null;
                         startFreeCardMove(movePkg, pos);
+                    }
+
+                    @Override
+                    public void onStartReplace(String newPkg, String newLabel) {
+                        openPopup = null;
+                        startReplaceDockCard(newPkg, newLabel, position);
                     }
                 });
     }
@@ -4984,6 +5171,109 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
                     card.setScaleY(1.18f);
                     snapGlassToCard(pos, card);
                 }
+            }
+        });
+    }
+
+    private void startReplaceDockCard(String newPkg, String newLabel, int returnPosition) {
+        isReplacingDockCard = true;
+        replacingNewPkg = newPkg;
+        replacingNewLabel = newLabel;
+        replaceReturnPosition = returnPosition;
+        wasExpandedBeforeReplace = isDockExpanded;
+        replacingCurrentPos = 0;
+
+        setHudFocusable(false);
+        pauseVisualTimers();
+
+        Toast.makeText(this, getString(R.string.toast_replace_mode_instruction, newLabel != null ? newLabel : ""), Toast.LENGTH_LONG).show();
+
+        if (isDockExpanded) {
+            collapseDockGrid();
+        } else {
+            refocusReplacingCard(0);
+        }
+    }
+
+    private void replaceDockCardLeft() {
+        ThemeManager tm = ThemeManager.get(this);
+        int total = tm.getDockPinnedPackages().size();
+        if (total == 0) return;
+        if (replacingCurrentPos > 0) {
+            replacingCurrentPos--;
+            grid.scrollToPosition(replacingCurrentPos);
+            refocusReplacingCard(replacingCurrentPos);
+        }
+    }
+
+    private void replaceDockCardRight() {
+        ThemeManager tm = ThemeManager.get(this);
+        int total = tm.getDockPinnedPackages().size();
+        if (total == 0) return;
+        if (replacingCurrentPos < total - 1) {
+            replacingCurrentPos++;
+            grid.scrollToPosition(replacingCurrentPos);
+            refocusReplacingCard(replacingCurrentPos);
+        }
+    }
+
+    private void confirmReplaceDockCard() {
+        ThemeManager tm = ThemeManager.get(this);
+        List<String> pinned = tm.getDockPinnedPackages();
+        if (replacingCurrentPos >= 0 && replacingCurrentPos < pinned.size() && replacingNewPkg != null) {
+            String oldPkg = pinned.get(replacingCurrentPos);
+            tm.replacePinnedPackage(oldPkg, replacingNewPkg);
+        }
+
+        isReplacingDockCard = false;
+        replacingNewPkg = null;
+        replacingNewLabel = null;
+        restoreHudFocusable();
+        reloadTiles();
+        resetVisualTimers();
+
+        if (wasExpandedBeforeReplace) {
+            forcedExpandFocusPos = replaceReturnPosition;
+            expandDockGrid();
+        } else {
+            final int pos = replacingCurrentPos;
+            grid.post(() -> focusTile(pos));
+        }
+    }
+
+    private void cancelReplaceDockCard() {
+        isReplacingDockCard = false;
+        replacingNewPkg = null;
+        replacingNewLabel = null;
+        restoreHudFocusable();
+        resetVisualTimers();
+
+        if (wasExpandedBeforeReplace) {
+            forcedExpandFocusPos = replaceReturnPosition;
+            expandDockGrid();
+        } else {
+            final int pos = replacingCurrentPos;
+            grid.post(() -> focusTile(pos));
+        }
+    }
+
+    private void refocusReplacingCard(int pos) {
+        if (adapter != null) adapter.setActivePosition(pos);
+        grid.post(() -> {
+            RecyclerView.ViewHolder vh = grid.findViewHolderForAdapterPosition(pos);
+            if (vh != null) {
+                View card = vh.itemView.findViewById(R.id.card);
+                if (card != null) {
+                    card.requestFocusFromTouch();
+                    card.requestFocus();
+                    snapGlassToCard(pos, card);
+                } else {
+                    vh.itemView.requestFocusFromTouch();
+                    vh.itemView.requestFocus();
+                    snapGlassToCard(pos, vh.itemView);
+                }
+            } else {
+                focusTile(pos);
             }
         });
     }

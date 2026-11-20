@@ -230,5 +230,6 @@
     <string name="dialog_replace_pinned_title">Replace app in dock</string>
     <string name="dialog_replace_pinned_hint">Choose which app to replace with %1$s</string>
     <string name="toast_app_replaced">Dock app replaced</string>
+    <string name="toast_replace_mode_instruction">Select which dock app to replace with %1$s (OK: Confirm | Back: Cancel)</string>
     <string name="dialog_hsv_saturation">Saturation: %1$d%%</string>
 </resources>

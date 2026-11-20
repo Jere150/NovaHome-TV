@@ -221,5 +221,6 @@
     <string name="dialog_replace_pinned_title">¿Qué app deseas reemplazar?</string>
     <string name="dialog_replace_pinned_hint">Elige la app que sustituirá a %1$s</string>
     <string name="toast_app_replaced">App reemplazada en el dock</string>
+    <string name="toast_replace_mode_instruction">Elige la app a sustituir por %1$s (OK: confirmar | Atrás: cancelar)</string>
     <string name="dialog_hsv_saturation">Saturación: %1$d%%</string>
 </resources>

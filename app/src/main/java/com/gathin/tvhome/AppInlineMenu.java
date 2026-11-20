@@ -41,6 +41,7 @@ public final class AppInlineMenu {
         void onActionCompleted(String pkg, boolean wasPinned);
         void onDismissed();
         void onStartMove(String pkg, int position);
+        void onStartReplace(String newPkg, String newLabel);
     }
 
     public static PopupWindow show(Context context, View card, int position, int totalCount,
@@ -111,15 +112,24 @@ public final class AppInlineMenu {
             int curPinnedCount = tm.getDockPinnedPackages().size();
             if (curPinnedCount >= ThemeManager.MAX_DOCK_APPS) {
                 panel.addView(createMenuItem(context, context.getString(R.string.menu_pin_dock), R.drawable.ic_pin, density, themeGlow, () -> {
+                    actionExecuted[0] = true;
                     popup.dismiss();
-                    showReplacePinnedDialog(context, pkg, label, callback);
+                    if (callback != null) {
+                        callback.onStartReplace(pkg, label);
+                    } else {
+                        showReplacePinnedDialog(context, pkg, label, callback);
+                    }
                 }));
             } else {
                 panel.addView(createMenuItem(context, context.getString(R.string.menu_pin_dock), R.drawable.ic_pin, density, themeGlow, () -> {
                     actionExecuted[0] = true;
                     if (!tm.addPinnedPackage(pkg)) {
                         popup.dismiss();
-                        showReplacePinnedDialog(context, pkg, label, callback);
+                        if (callback != null) {
+                            callback.onStartReplace(pkg, label);
+                        } else {
+                            showReplacePinnedDialog(context, pkg, label, callback);
+                        }
                     } else {
                         popup.dismiss();
                         if (callback != null) callback.onActionCompleted(pkg, false);
