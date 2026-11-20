@@ -23,30 +23,36 @@
 
 ## ¿Por qué NovaHome TV?
 
-Los televisores inteligentes y dispositivos de streaming actuales sufren una degradación severa de rendimiento debido al diseño de sus interfaces de fábrica:
+Encender el televisor no debería significar esperar a que carguen anuncios ni lidiar con menús lentos. La pantalla de inicio de fábrica en Android TV y Google TV viene sobrecargada de publicidad, recomendaciones no solicitadas y procesos en segundo plano que consumen cientos de megabytes de memoria RAM. En televisores económicos o dispositivos de streaming con 1 GB o 2 GB de memoria, esto provoca retrasos con el control remoto, congelamientos y lentitud general.
 
-* **El Problema del Launcher Oficial:** El lanzador por defecto de Google TV / Android TV satura entre **250 MB y 450 MB de memoria RAM**, consume ancho de banda constante transmitiendo tráilers automáticos en 4K, despliega más de un **60% de publicidad no solicitada** en la pantalla de inicio y recopila telemetría de uso continua. En dispositivos de gama de entrada o televisores con 1 GB de RAM, esto genera congelamientos, cierres forzados de aplicaciones y lentitud insoportable al navegar con el control remoto.
-* **La Solución NovaHome TV:** Diseñado desde cero como un lanzador minimalista, premium y autónomo. Consume **menos de 28.6 MB de RAM**, elimina el 100% de la publicidad y telemetría, ofrece personalización visual en tiempo real a 60/144 FPS y devuelve la respuesta instantánea del control remoto incluso en los televisores más económicos del mercado.
+NovaHome TV fue creado para devolverle la velocidad, la privacidad y la limpieza a tu televisor:
+
+* **Cero anuncios y cero distracciones:** Tu pantalla de inicio es tuya. Sin banners patrocinados, sin tráilers automáticos y sin telemetría en segundo plano.
+* **Menos de 28 MB de memoria RAM:** Mientras el launcher oficial consume entre 250 y 450 MB, NovaHome opera entre 19.5 y 28.6 MB, liberando casi toda la memoria del televisor para tus aplicaciones y juegos.
+* **Respuesta instantánea del control:** Navegación suave a 60 FPS estables (y preparada para 120 Hz / 144 Hz en pantallas modernas).
+* **Personalización total en vivo:** Cambia colores con la paleta HSV, ajusta la opacidad del dock, el redondeo de esquinas y coloca tus propios fondos de pantalla en tiempo real.
 
 ---
 
-## Tabla Comparativa Técnica
+## Comparativa Directa
 
-| Característica / Criterio | Launcher Stock de Fábrica (Google TV) | CleanYourTV (Base Upstream) | NovaHome TV (v1.5) |
-|---|---|---|---|
-| **Consumo de Memoria RAM** | 250 MB – 450 MB (Crítico) | ~40 MB – 50 MB | **19.5 MB – 28.6 MB (Ultraligero)** |
-| **Publicidad y Tráilers Automáticos** | Sí (Invasivo, > 60% de pantalla) | No (0% Publicidad) | **No (0% Publicidad, Cero Banners)** |
-| **Telemetría y Conexiones en Fondo** | Constante (Google Analytics / Ads) | No | **Cero Peticiones (Privacidad Absoluta)** |
-| **Personalización de Color y Estilo** | Ninguna (Fijo por fabricante) | Básica / Estática | **Matriz 2D HSV en Vivo, Opacidad y Radio** |
-| **Sistema de Dock de Aplicaciones** | Renglón rígido predeterminado | Fijo (requiere fijado forzado) | **Bajo Demanda (0 a 6 apps) + Sustitución interactiva** |
-| **Panel Flotante de Entradas (HDMI / AV)** | Menú lateral tosco del sistema | Menú de texto estándar | **Panel Simétrico Translúcido con Detección Automática** |
-| **Modo Arte y Salvapantallas OLED** | Backdrop pesado con carga de red | No incluido | **Modo Arte Nativo + Clock Anti-Burn-In OLED** |
-| **Soporte de Frecuencias Ultra-Altas** | Limitado por compositor stock | 60 Hz estándar | **Nativo 120 Hz / 144 Hz (`configureHighRefreshRate`)** |
-| **Compatibilidad con TV Abierta (Sintonizador)** | Enlace interno propietario | Limitado | **Soporte Nativo Live TV (MediaTek / AOSP)** |
+| Característica | Launcher de Fábrica (Google TV / Android TV) | NovaHome TV |
+|---|---|---|
+| **Publicidad y Tráilers** | Sí (ocupan más del 60% de la pantalla) | **0% Anuncios (pantalla limpia)** |
+| **Consumo de Memoria RAM** | 250 MB – 450 MB | **19.5 MB – 28.6 MB (Ultraligero)** |
+| **Rastreadores y Telemetría** | Activos en segundo plano | **Cero conexiones externas (100% privado)** |
+| **Personalización Visual** | Fija (definida por el fabricante) | **Selector de color HSV en vivo, temas y fondos propios** |
+| **Dock de Aplicaciones** | Renglón rígido de fábrica | **Bajo demanda (0 a 6 apps) con sustitución interactiva** |
+| **Entradas HDMI / AV** | Menú lateral tosco del sistema | **Panel flotante simétrico con detección de hardware** |
+| **Modo Arte y Salvapantallas** | Backdrop pesado con descarga continua de red | **Modo Arte ligero + reloj flotante anti-quemado OLED** |
+| **Soporte de Paneles Rápidos** | Limitado a 60 Hz estándar | **Nativo 120 Hz / 144 Hz (`configureHighRefreshRate`)** |
+| **Sintonizador de TV / Cable** | Enlace propietario o difícil de acceder | **Soporte directo para Live TV nativa** |
 
 ---
 
 ## Galería Visual
+
+### Interfaz Predeterminada (Estilo Minimalista)
 
 | Home Minimalista y Dock | Cajón de Aplicaciones Expandido |
 |:---:|:---:|
@@ -55,6 +61,15 @@ Los televisores inteligentes y dispositivos de streaming actuales sufren una deg
 | Modo Arte (Sin Distracciones) | Salvapantallas Cinemático OLED |
 | <img src="docs/screenshots/03_art_mode.webp" width="480" alt="Modo Arte"/> | <img src="docs/screenshots/04_screensaver.webp" width="480" alt="Salvapantallas"/> |
 | *Fondo ambiental limpio con reloj minimalista y fecha dinámica.* | *Reloj flotante ultra-ligero con protección anti-quemado OLED.* |
+
+### Personalización sin Límites (Ejemplo con Tema Personalizado)
+
+Puedes transformar completamente la estética de tu televisor usando fondos propios, ajustando la opacidad y sincronizando el resplandor de acento con el selector HSV en vivo:
+
+| Tema Personalizado con Fondo Propio | Ajustes Flotantes en Tiempo Real |
+|:---:|:---:|
+| <img src="docs/screenshots/05_custom_theme.webp" width="480" alt="Tema Personalizado"/> | <img src="docs/screenshots/06_settings_custom.webp" width="480" alt="Ajustes Rápidos"/> |
+| *Fondo propio de alta resolución con resplandor neón sincronizado.* | *Panel lateral flotante con ajuste inmediato de color, brillo y opacidad.* |
 
 ---
 

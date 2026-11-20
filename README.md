@@ -23,30 +23,36 @@
 
 ## Why NovaHome TV?
 
-Modern Smart TVs and streaming devices suffer from severe performance bottlenecks due to bloated, ad-heavy manufacturer home screens:
+Turning on your TV shouldn't mean waiting for ads to load or dealing with sluggish, laggy menus. Stock Android TV and Google TV home screens come heavily overloaded with sponsored banners, unsolicited recommendations, and background services eating hundreds of megabytes of RAM. On budget smart TVs or streaming boxes with 1 GB or 2 GB of memory, this creates frustrating remote input lag, stuttering animations, and app crashes.
 
-* **The Problem with Stock Launchers:** The default Google TV / Android TV home screen consumes between **250 MB and 450 MB of RAM**, continuously streams 4K video previews and auto-playing trailers, covers over **60% of the screen with sponsored advertisements**, and polls continuous user telemetry in the background. On budget smart TVs and devices with 1 GB of RAM, this causes constant freezing, remote input lag, and frequent out-of-memory crashes.
-* **The NovaHome TV Solution:** Re-engineered from the ground up as a pure, lightweight, privacy-respecting launcher. It operates in **under 28.6 MB of RAM**, eliminates 100% of ads and trackers, offers 60/144 FPS real-time visual customization, and restores instant remote control responsiveness even on entry-level hardware.
+NovaHome TV was built to bring speed, privacy, and simplicity back to your TV:
+
+* **Zero ads and zero distractions:** Your home screen belongs to you. No sponsored tiles, no auto-playing trailers, and no background telemetry.
+* **Under 28 MB of RAM:** While stock launchers consume between 250 MB and 450 MB, NovaHome runs within 19.5 MB – 28.6 MB, freeing up almost all system memory for your favorite streaming apps and games.
+* **Instant remote responsiveness:** Silky smooth navigation locked at 60 FPS (and ready for 120 Hz / 144 Hz on high-refresh panels).
+* **Live, real-time customization:** Adjust dock opacity, corner radius, and fine-tune accent colors using an interactive 2D HSV color picker or custom wallpapers on the fly.
 
 ---
 
-## Technical Comparison Matrix
+## Direct Comparison
 
-| Feature / Metric | Stock Google TV Launcher | CleanYourTV (Upstream Base) | NovaHome TV (v1.5) |
-|---|---|---|---|
-| **RAM Footprint** | 250 MB – 450 MB (Bloated) | ~40 MB – 50 MB | **19.5 MB – 28.6 MB (Ultra-Lean)** |
-| **Sponsored Ads & Auto-Trailers** | Yes (Over 60% of viewport) | No (0% Ads) | **No (0% Ads, Zero Sponsored Banners)** |
-| **Background Telemetry & Analytics** | Continuous (Google Analytics/Ads) | None | **Zero Network Calls (Total Privacy)** |
-| **Real-time Color & Theme Engine** | None (Locked by vendor) | Basic / Static | **Live 2D HSV Canvas Matrix, Opacity, Radius** |
-| **App Dock Architecture** | Rigid manufacturer shelf | Fixed (requires forced pinning) | **On-Demand (0 to 6 apps) + Interactive in-dock replace** |
-| **Floating Inputs Panel (HDMI / AV)** | Heavy system side drawer | Plain text menu | **Symmetrical Translucent Panel with Hardware Auto-Detection** |
-| **Art Mode & OLED Screensaver** | Heavy network-streaming Backdrop | None | **Native Low-Power Art Mode + OLED Anti-Burn-In Clock** |
-| **High Refresh Rate Support** | Capped by stock compositor | 60 Hz standard | **Native 120 Hz / 144 Hz (`configureHighRefreshRate`)** |
-| **Over-the-Air Live TV Integration** | Proprietary internal intent | Limited | **Native Tuner Integration (MediaTek / AOSP)** |
+| Feature | Stock Factory Launcher (Google TV / Android TV) | NovaHome TV |
+|---|---|---|
+| **Advertisements & Auto-Trailers** | Yes (over 60% of screen estate) | **0% Ads (completely clean)** |
+| **RAM Footprint** | 250 MB – 450 MB | **19.5 MB – 28.6 MB (Ultra-Lean)** |
+| **Telemetry & Background Tracking** | Active background telemetry | **Zero external calls (100% private)** |
+| **Visual Customization** | Locked by manufacturer | **Live HSV color matrix, opacity, radius & custom wallpapers** |
+| **Application Dock** | Rigid vendor layout | **On-demand (0 to 6 pinned apps) with interactive replacement** |
+| **Inputs Panel (HDMI / AV)** | Heavy system side menu | **Symmetrical translucent panel with hardware auto-detection** |
+| **Art Mode & Screensaver** | Heavy network-streaming Backdrop | **Lightweight Art Mode + OLED anti-burn-in floating clock** |
+| **High Refresh Rate Support** | Capped at 60 Hz standard | **Native 120 Hz / 144 Hz (`configureHighRefreshRate`)** |
+| **Broadcast TV / Cable Tuner** | Proprietary or buried deep in settings | **Direct native Live TV support** |
 
 ---
 
 ## Visual Showcase
+
+### Default Interface (Minimalist Style)
 
 | Minimalist Home & Dock | Expanded Application Drawer |
 |:---:|:---:|
@@ -55,6 +61,15 @@ Modern Smart TVs and streaming devices suffer from severe performance bottleneck
 | Art Mode (Uncluttered) | Cinematic OLED Screensaver |
 | <img src="docs/screenshots/03_art_mode.webp" width="480" alt="Art Mode"/> | <img src="docs/screenshots/04_screensaver.webp" width="480" alt="Screensaver"/> |
 | *Clean ambient backdrop with minimal clock and dynamic date.* | *Ultra-lightweight floating clock with anti-burn-in protection.* |
+
+### Limitless Personalization (Custom Theme Example)
+
+You can completely redefine your TV's atmosphere with your own high-resolution wallpapers, adjusting dock opacity and synchronizing accent glows in real time:
+
+| Custom Theme with Personal Wallpaper | Live Floating Quick Settings |
+|:---:|:---:|
+| <img src="docs/screenshots/05_custom_theme.webp" width="480" alt="Custom Theme"/> | <img src="docs/screenshots/06_settings_custom.webp" width="480" alt="Quick Settings"/> |
+| *Personal high-res wallpaper paired with synchronized neon accents.* | *Floating side settings for immediate color, glow, and opacity tuning.* |
 
 ---
 
