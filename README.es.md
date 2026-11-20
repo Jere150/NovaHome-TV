@@ -130,6 +130,20 @@ También puedes compilar e instalar automáticamente en un solo paso:
 
 ---
 
+### Opción C: Instalación Directa mediante USB o App de Transferencia (Sin Computadora)
+
+Si prefieres no usar una computadora ni comandos ADB:
+
+1. Descarga el archivo **`NovaHome-v1.0.apk`** directamente desde [GitHub Releases](https://github.com/Jere150/NovaHome-TV/releases/tag/v1.0) en tu teléfono o computadora.
+2. Transfiere el archivo APK a tu Android TV mediante cualquiera de estos métodos:
+   * **Memoria USB (Pendrive):** Copia el archivo APK en un pendrive y conéctalo al puerto USB de tu televisor.
+   * **App de transferencia inalámbrica:** Envía el archivo por Wi-Fi utilizando aplicaciones como *Send Files to TV (SFTV)* o *LocalSend* instaladas tanto en tu teléfono como en el televisor.
+3. Abre cualquier explorador de archivos en tu televisor (por ejemplo, *AnExplorer*, *FX File Explorer* o *File Commander*).
+4. Selecciona el archivo APK y pulsa **Instalar**.
+   *(Si el sistema Android TV lo solicita, autoriza los permisos para "Instalar aplicaciones desconocidas" en Ajustes > Seguridad y restricciones).*
+
+---
+
 ## Licencia y Reconocimientos a Terceros
 
 NovaHome TV se distribuye bajo la [Licencia MIT](LICENSE).

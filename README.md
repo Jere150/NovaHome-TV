@@ -130,6 +130,20 @@ You can also build and install automatically in a single command:
 
 ---
 
+### Option C: Direct Installation via USB Drive or Transfer App (No Computer Required)
+
+If you prefer not to use a computer or ADB command line:
+
+1. Download **`NovaHome-v1.0.apk`** directly from [GitHub Releases](https://github.com/Jere150/NovaHome-TV/releases/tag/v1.0) on your phone or computer.
+2. Transfer the APK file to your Android TV using either method:
+   * **USB Flash Drive:** Copy the APK to a USB pendrive and connect it to your TV's USB port.
+   * **Wireless Transfer App:** Send the file over Wi-Fi using apps like *Send Files to TV (SFTV)* or *LocalSend* installed on both your smartphone and TV.
+3. Open any file explorer on your TV (e.g. *AnExplorer*, *FX File Explorer*, or *File Commander*).
+4. Select the APK and click **Install**.
+   *(If prompted by Android TV, grant the file explorer permission to "Install unknown apps" under TV Settings > Security & Restrictions).*
+
+---
+
 ## License & Third-Party Attribution
 
 NovaHome TV is released under the [MIT License](LICENSE).
