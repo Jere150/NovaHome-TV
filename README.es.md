@@ -70,9 +70,9 @@ Puedes transformar completamente la estética de tu televisor usando fondos prop
 |:---:|:---:|
 | <img src="docs/screenshots/05_custom_home_dock.webp" width="480" alt="Dock Personalizado"/> | <img src="docs/screenshots/06_custom_app_drawer.webp" width="480" alt="Cajón de Apps Personalizado"/> |
 | *Fondo propio de alta resolución con resplandor neón sincronizado.* | *Cuadrícula de aplicaciones fluida integrada sobre el arte del fondo.* |
-| Modo Arte Personalizado | Salvapantallas Cinemático OLED |
-| <img src="docs/screenshots/07_custom_art_mode.webp" width="480" alt="Modo Arte Personalizado"/> | <img src="docs/screenshots/04_screensaver.webp" width="480" alt="Salvapantallas"/> |
-| *Modo Arte ambiental limpio mostrando la ilustración completa.* | *Reloj flotante ultra-ligero con protección anti-quemado OLED.* |
+| Modo Arte Personalizado | Salvapantallas Personalizado (Orbital Clock) |
+| <img src="docs/screenshots/07_custom_art_mode.webp" width="480" alt="Modo Arte Personalizado"/> | <img src="docs/screenshots/08_custom_screensaver.webp" width="480" alt="Salvapantallas Personalizado"/> |
+| *Modo Arte ambiental limpio mostrando la ilustración completa.* | *Salvapantallas temático interactivo con reloj orbital y protección OLED.* |
 
 ---
 

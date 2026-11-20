@@ -70,9 +70,9 @@ You can completely redefine your TV's atmosphere with your own high-resolution w
 |:---:|:---:|
 | <img src="docs/screenshots/05_custom_home_dock.webp" width="480" alt="Custom Home Dock"/> | <img src="docs/screenshots/06_custom_app_drawer.webp" width="480" alt="Custom App Drawer"/> |
 | *Personal high-res wallpaper paired with synchronized neon accents.* | *Smooth application grid seamlessly integrated over custom background art.* |
-| Custom Art Mode | Cinematic OLED Screensaver |
-| <img src="docs/screenshots/07_custom_art_mode.webp" width="480" alt="Custom Art Mode"/> | <img src="docs/screenshots/04_screensaver.webp" width="480" alt="Screensaver"/> |
-| *Uncluttered ambient art mode showcasing full wallpaper artwork.* | *Ultra-lightweight floating clock with anti-burn-in protection.* |
+| Custom Art Mode | Custom Themed Screensaver (Orbital Clock) |
+| <img src="docs/screenshots/07_custom_art_mode.webp" width="480" alt="Custom Art Mode"/> | <img src="docs/screenshots/08_custom_screensaver.webp" width="480" alt="Custom Themed Screensaver"/> |
+| *Uncluttered ambient art mode showcasing full wallpaper artwork.* | *Interactive themed screensaver with orbital clock and OLED protection.* |
 
 ---
 
