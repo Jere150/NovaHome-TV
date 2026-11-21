@@ -4642,10 +4642,16 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         int padRowV = (int) (9 * density);
         row.setPadding(padRowH, padRowV, padRowH, padRowV);
 
+        ThemeManager tm = ThemeManager.get(this);
+        int baseColor = ThemeManager.parseColorSafely(tm.getDockBackgroundColorHex(), Color.parseColor("#141824"));
+        int normalRowBg = ThemeManager.blendWithElevation(baseColor, 0.12f, 0xFF);
+        int normalRowStroke = ThemeManager.blendWithElevation(baseColor, 0.28f, 0x88);
+        int focusRowBg = ThemeManager.blendWithElevation(baseColor, 0.24f, 0xFF);
+
         GradientDrawable rowBg = new GradientDrawable();
-        rowBg.setColor(Color.parseColor("#1C2130"));
+        rowBg.setColor(normalRowBg);
         rowBg.setCornerRadius(8 * density);
-        rowBg.setStroke((int) Math.max(1, density), Color.parseColor("#262D3E"));
+        rowBg.setStroke((int) Math.max(1, density), normalRowStroke);
         row.setBackground(rowBg);
 
         ImageView ivIcon = new ImageView(this);
@@ -4690,11 +4696,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         row.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus) {
-                rowBg.setColor((glowColor & 0x00FFFFFF) | 0x33000000);
+                rowBg.setColor(focusRowBg);
                 rowBg.setStroke((int) (2 * density), glowColor);
             } else {
-                rowBg.setColor(Color.parseColor("#1C2130"));
-                rowBg.setStroke((int) Math.max(1, density), Color.parseColor("#262D3E"));
+                rowBg.setColor(normalRowBg);
+                rowBg.setStroke((int) Math.max(1, density), normalRowStroke);
             }
         });
 

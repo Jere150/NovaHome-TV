@@ -183,7 +183,7 @@ public final class LauncherQuickSettingsDialog {
             }
         };
 
-        Runnable refreshThemes = () -> populateThemesRow(themesRowContainer, context, tm, listener, updateThemedViews);
+        Runnable refreshThemes = () -> populateThemesRow(themesRowContainer, context, tm, dynamicThemedUpdaters, listener, updateThemedViews);
         refreshThemes.run();
 
         // --- 2. COLOR DEL DOCK ---
@@ -427,7 +427,7 @@ public final class LauncherQuickSettingsDialog {
         }
     }
 
-    private static void populateThemesRow(ViewGroup container, Context context, ThemeManager tm, OnSettingsChangeListener listener, Runnable onColorChanged) {
+    private static void populateThemesRow(ViewGroup container, Context context, ThemeManager tm, List<Runnable> updaters, OnSettingsChangeListener listener, Runnable onColorChanged) {
         container.removeAllViews();
         float density = context.getResources().getDisplayMetrics().density;
 
@@ -455,15 +455,20 @@ public final class LauncherQuickSettingsDialog {
         btnSave.setClickable(true);
 
         GradientDrawable saveNormalBg = new GradientDrawable();
-        saveNormalBg.setColor(Color.parseColor("#1B2A3E"));
         saveNormalBg.setCornerRadius(8 * density);
-        saveNormalBg.setStroke((int) Math.max(1, density), Color.parseColor("#3B82F6"));
-        btnSave.setBackground(saveNormalBg);
 
         GradientDrawable saveFocusBg = new GradientDrawable();
-        saveFocusBg.setColor(Color.parseColor("#2563EB"));
         saveFocusBg.setCornerRadius(8 * density);
-        saveFocusBg.setStroke((int) (2 * density), Color.WHITE);
+
+        Runnable refreshSave = () -> {
+            saveNormalBg.setColor(getPillNormalColor(tm));
+            saveNormalBg.setStroke((int) Math.max(1, density), getFocusStrokeColor(tm));
+            saveFocusBg.setColor(getPillFocusColor(tm));
+            saveFocusBg.setStroke((int) (2 * density), getFocusStrokeColor(tm));
+            btnSave.setBackground(btnSave.hasFocus() ? saveFocusBg : saveNormalBg);
+        };
+        refreshSave.run();
+        if (updaters != null) updaters.add(refreshSave);
 
         btnSave.setOnFocusChangeListener((v, hasFocus) -> {
             btnSave.setBackground(hasFocus ? saveFocusBg : saveNormalBg);
@@ -473,7 +478,7 @@ public final class LauncherQuickSettingsDialog {
         });
 
         btnSave.setOnClickListener(v -> showSaveThemeDialog(context, tm, () -> {
-            populateThemesRow(container, context, tm, listener, onColorChanged);
+            populateThemesRow(container, context, tm, updaters, listener, onColorChanged);
             if (listener != null) listener.onThemeUpdated();
             if (onColorChanged != null) onColorChanged.run();
         }));
@@ -496,15 +501,20 @@ public final class LauncherQuickSettingsDialog {
             btn.setClickable(true);
 
             GradientDrawable normalBg = new GradientDrawable();
-            normalBg.setColor(Color.parseColor("#1B2A3E"));
             normalBg.setCornerRadius(8 * density);
-            normalBg.setStroke((int) Math.max(1, density), Color.parseColor("#60A5FA"));
-            btn.setBackground(normalBg);
 
             GradientDrawable focusBg = new GradientDrawable();
-            focusBg.setColor(Color.parseColor("#2C3E55"));
             focusBg.setCornerRadius(8 * density);
-            focusBg.setStroke((int) (2 * density), Color.WHITE);
+
+            Runnable refreshSavedChip = () -> {
+                normalBg.setColor(getPillNormalColor(tm));
+                normalBg.setStroke((int) Math.max(1, density), getFocusStrokeColor(tm));
+                focusBg.setColor(getPillFocusColor(tm));
+                focusBg.setStroke((int) (2 * density), getFocusStrokeColor(tm));
+                btn.setBackground(btn.hasFocus() ? focusBg : normalBg);
+            };
+            refreshSavedChip.run();
+            if (updaters != null) updaters.add(refreshSavedChip);
 
             btn.setOnFocusChangeListener((v, hasFocus) -> {
                 btn.setBackground(hasFocus ? focusBg : normalBg);
@@ -521,7 +531,7 @@ public final class LauncherQuickSettingsDialog {
             });
 
             btn.setOnLongClickListener(v -> {
-                showDeleteProfileDialog(context, tm, savedName, () -> populateThemesRow(container, context, tm, listener, onColorChanged));
+                showDeleteProfileDialog(context, tm, savedName, () -> populateThemesRow(container, context, tm, updaters, listener, onColorChanged));
                 return true;
             });
 
@@ -551,15 +561,20 @@ public final class LauncherQuickSettingsDialog {
             btn.setClickable(true);
 
             GradientDrawable normalBg = new GradientDrawable();
-            normalBg.setColor(Color.parseColor("#252836"));
             normalBg.setCornerRadius(8 * density);
-            normalBg.setStroke((int) Math.max(1, density), Color.parseColor("#3B4252"));
-            btn.setBackground(normalBg);
 
             GradientDrawable focusBg = new GradientDrawable();
-            focusBg.setColor(Color.parseColor("#384156"));
             focusBg.setCornerRadius(8 * density);
-            focusBg.setStroke((int) (2 * density), Color.parseColor(p.glow));
+
+            Runnable refreshPresetChip = () -> {
+                normalBg.setColor(getPillNormalColor(tm));
+                normalBg.setStroke((int) Math.max(1, density), getPillBorderColor(tm));
+                focusBg.setColor(getPillFocusColor(tm));
+                focusBg.setStroke((int) (2 * density), getFocusStrokeColor(tm));
+                btn.setBackground(btn.hasFocus() ? focusBg : normalBg);
+            };
+            refreshPresetChip.run();
+            if (updaters != null) updaters.add(refreshPresetChip);
 
             btn.setOnFocusChangeListener((v, hasFocus) -> {
                 btn.setBackground(hasFocus ? focusBg : normalBg);
@@ -650,12 +665,14 @@ public final class LauncherQuickSettingsDialog {
             chip.setClickable(true);
 
             GradientDrawable chipBg = new GradientDrawable();
-            chipBg.setColor(Color.parseColor("#252836"));
+            chipBg.setColor(getPillNormalColor(tm));
             chipBg.setCornerRadius(6 * density);
+            chipBg.setStroke((int) Math.max(1, density), getPillBorderColor(tm));
             chip.setBackground(chipBg);
 
             chip.setOnFocusChangeListener((v, hasFocus) -> {
-                chipBg.setColor(hasFocus ? Color.parseColor("#60A5FA") : Color.parseColor("#252836"));
+                chipBg.setColor(hasFocus ? getPillFocusColor(tm) : getPillNormalColor(tm));
+                chipBg.setStroke((int) (hasFocus ? 2 * density : Math.max(1, density)), hasFocus ? getFocusStrokeColor(tm) : getPillBorderColor(tm));
             });
 
             chip.setOnClickListener(v -> {

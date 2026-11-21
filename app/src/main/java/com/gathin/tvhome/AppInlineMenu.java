@@ -279,6 +279,10 @@ public final class AppInlineMenu {
 
         int glowColor = tm.getParsedGlowColor();
         int borderColor = tm.getParsedBorderColor();
+        int baseColor = ThemeManager.parseColorSafely(tm.getDockBackgroundColorHex(), Color.parseColor("#141824"));
+        int normalRowBg = ThemeManager.blendWithElevation(baseColor, 0.12f, 0xFF);
+        int normalRowStroke = ThemeManager.blendWithElevation(baseColor, 0.28f, 0x88);
+        int focusRowBg = ThemeManager.blendWithElevation(baseColor, 0.24f, 0xFF);
         GradientDrawable bg = new GradientDrawable();
         bg.setColor(Color.parseColor("#F0101422"));
         bg.setCornerRadius(16 * density);
@@ -337,9 +341,9 @@ public final class AppInlineMenu {
             itemRow.setPadding(rowPadH, rowPadV, rowPadH, rowPadV);
 
             GradientDrawable itemBg = new GradientDrawable();
-            itemBg.setColor(Color.parseColor("#1C2130"));
+            itemBg.setColor(normalRowBg);
             itemBg.setCornerRadius(10 * density);
-            itemBg.setStroke((int) Math.max(1, density), Color.parseColor("#262D3E"));
+            itemBg.setStroke((int) Math.max(1, density), normalRowStroke);
             itemRow.setBackground(itemBg);
 
             if (itemIcon != null) {
@@ -368,15 +372,15 @@ public final class AppInlineMenu {
 
             itemRow.setOnFocusChangeListener((v, hasFocus) -> {
                 if (hasFocus) {
-                    itemBg.setColor((glowColor & 0x00FFFFFF) | 0x33000000);
+                    itemBg.setColor(focusRowBg);
                     itemBg.setStroke((int) (2 * density), glowColor);
                     itemRow.setScaleX(1.02f);
                     itemRow.setScaleY(1.02f);
                     tvItemName.setTextColor(Color.WHITE);
                     ivSwap.setImageTintList(ColorStateList.valueOf(glowColor));
                 } else {
-                    itemBg.setColor(Color.parseColor("#1C2130"));
-                    itemBg.setStroke((int) Math.max(1, density), Color.parseColor("#262D3E"));
+                    itemBg.setColor(normalRowBg);
+                    itemBg.setStroke((int) Math.max(1, density), normalRowStroke);
                     itemRow.setScaleX(1.0f);
                     itemRow.setScaleY(1.0f);
                     tvItemName.setTextColor(Color.parseColor("#E6FFFFFF"));

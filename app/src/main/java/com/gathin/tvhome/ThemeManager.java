@@ -798,6 +798,18 @@ public final class ThemeManager {
     public String getScreensaverSource() { return screensaverSource; }
     public void setScreensaverSource(String source) { this.screensaverSource = source; }
 
+    public static int blendWithElevation(int base, float factor, int alpha) {
+        int r = Color.red(base);
+        int g = Color.green(base);
+        int b = Color.blue(base);
+
+        r = Math.min(255, (int) (r + (255 - r) * factor));
+        g = Math.min(255, (int) (g + (255 - g) * factor));
+        b = Math.min(255, (int) (b + (255 - b) * factor));
+
+        return Color.argb(alpha, r, g, b);
+    }
+
     public boolean isAntiBurnInCycle() { return antiBurnInCycle; }
     public void setAntiBurnInCycle(boolean enable) { this.antiBurnInCycle = enable; }
 }
