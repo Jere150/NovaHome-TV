@@ -1,4 +1,4 @@
-# NovaHome TV (v1.0 Estable)
+# NovaHome TV (v1.5 Estable)
 
 <p align="center">
   <strong>Lanzador de aplicaciones (launcher) ultraligero, acelerado por hardware y enfocado en la privacidad para Android TV, desarrollado 100% en Java 17 puro.</strong><br>
@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Lanzamiento-v1.0--Estable-brightgreen?style=flat-square" alt="Lanzamiento">
+  <img src="https://img.shields.io/badge/Lanzamiento-v1.5--Estable-brightgreen?style=flat-square" alt="Lanzamiento">
   <img src="https://img.shields.io/badge/Android%20TV-8.0%2B%20(API%2026%2B)-blue?style=flat-square" alt="Plataforma">
   <img src="https://img.shields.io/badge/Lenguaje-Java%2017%20Puro-orange?style=flat-square" alt="Lenguaje">
   <img src="https://img.shields.io/badge/Dependencias-AndroidX%20M%C3%ADnimo%20(Sin%20Compose)-success?style=flat-square" alt="Dependencias">
@@ -143,7 +143,7 @@ NovaHome TV implementa perfiles dinámicos de optimización según la memoria di
 
 ### Opción A: Instalar APK Precompilado de Lanzamiento
 
-1. Descarga **`NovaHome-v1.0.apk`** desde [GitHub Releases](https://github.com/Jere150/NovaHome-TV/releases/tag/v1.0).
+1. Descarga **`NovaHome-v1.5.apk`** desde [GitHub Releases](https://github.com/Jere150/NovaHome-TV/releases/tag/v1.5).
 2. Habilita las **Opciones para desarrolladores** y la **Depuración por red / USB** en tu Android TV.
 3. Conecta tu computadora al televisor mediante ADB:
    ```bash
@@ -151,7 +151,7 @@ NovaHome TV implementa perfiles dinámicos de optimización según la memoria di
    ```
 4. Instala el paquete de lanzamiento:
    ```bash
-   adb install -r NovaHome-v1.0.apk
+   adb install -r NovaHome-v1.5.apk
    ```
 
 ---
@@ -189,7 +189,7 @@ También puedes compilar e instalar automáticamente en un solo paso:
 
 Si prefieres no usar una computadora ni comandos ADB:
 
-1. Descarga el archivo **`NovaHome-v1.0.apk`** directamente desde [GitHub Releases](https://github.com/Jere150/NovaHome-TV/releases/tag/v1.0) en tu teléfono o computadora.
+1. Descarga el archivo **`NovaHome-v1.5.apk`** directamente desde [GitHub Releases](https://github.com/Jere150/NovaHome-TV/releases/tag/v1.5) en tu teléfono o computadora.
 2. Transfiere el archivo APK a tu Android TV mediante cualquiera de estos métodos:
    * **Memoria USB (Pendrive):** Copia el archivo APK en un pendrive y conéctalo al puerto USB de tu televisor.
    * **App de transferencia inalámbrica:** Envía el archivo por Wi-Fi utilizando aplicaciones como *Send Files to TV (SFTV)* o *LocalSend* instaladas tanto en tu teléfono como en el televisor.
