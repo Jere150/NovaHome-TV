@@ -1022,6 +1022,10 @@ public final class LauncherQuickSettingsDialog {
         scanImagesInDir(new File("/sdcard/Download"), images, seenCanonical);
         File extPics = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
         if (extPics != null) scanImagesInDir(extPics, images, seenCanonical);
+        File appPics = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        if (appPics != null) scanImagesInDir(appPics, images, seenCanonical);
+        File appFiles = context.getExternalFilesDir(null);
+        if (appFiles != null) scanImagesInDir(appFiles, images, seenCanonical);
 
         for (File img : images) {
             String rawName = img.getName();

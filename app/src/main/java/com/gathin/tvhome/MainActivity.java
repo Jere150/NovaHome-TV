@@ -837,7 +837,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             customWallpaperView.setImageBitmap(bmp);
             customWallpaperView.setVisibility(View.VISIBLE);
             if (sky != null) sky.setVisibility(View.GONE);
-            if (root != null) root.setBackground(null);
+            if (root != null) root.setBackgroundColor(0xFF000000);
         } else {
             GradientDrawable defaultBg = new GradientDrawable(
                     GradientDrawable.Orientation.TOP_BOTTOM,
@@ -1240,10 +1240,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
         root = findViewById(R.id.root);
         root.setBackgroundColor(cfg.backgroundColor);
-        // root fills the window with an opaque colour (Config keeps background_color opaque), so the window's own
-        // black under it is a second full-screen fill on every frame for nothing. The starting window still uses
-        // the theme's background, so launch looks the same.
-        getWindow().setBackgroundDrawable(null);
+        // Garantizar que la ventana siempre tenga un fondo opaco negro (#000000) para evitar
+        // que el compositor de hardware de la GPU (especialmente en chips Mali de gama de entrada)
+        // deje regiones sucias o artefactos fantasma en redibujados parciales del RecyclerView.
+        getWindow().setBackgroundDrawable(new ColorDrawable(0xFF000000));
         wallpaperPlayer = new WallpaperPlayer(this, root, cfg);
 
         customWallpaperView = findViewById(R.id.customWallpaperView);

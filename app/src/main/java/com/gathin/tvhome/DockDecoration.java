@@ -18,6 +18,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
     private final float density;
     private final Paint band = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint edge = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint solidBase = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final RectF rect = new RectF();
 
     /** Extra band below the tiles for their names (always_show_names), in px. */
@@ -70,6 +71,8 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
         this.evenPadding = evenPadding;
         this.bandVisible = bandVisible;
         band.setColor(translucent ? 0x8C121014 : (Math.round(opacity * 2.55f) << 24) | 0x141416);
+        solidBase.setColor(0xFF0A0C14);
+        solidBase.setStyle(Paint.Style.FILL);
         edge.setStyle(Paint.Style.STROKE);
         edge.setStrokeWidth(density);
         edge.setColor(lightGlass ? 0x38FFFFFF : translucent ? 0x26FFFFFF : 0x1FFFFFFF);
@@ -140,6 +143,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             float top = parent.getPaddingTop() - 10 * density;
             float bottom = parent.getHeight() - 12 * density;
             rect.set(left, top, right, bottom);
+            c.drawRoundRect(rect, radius, radius, solidBase);
             c.drawRoundRect(rect, radius, radius, band);
             c.drawRoundRect(rect, radius, radius, edge);
             return;
@@ -195,6 +199,7 @@ public class DockDecoration extends RecyclerView.ItemDecoration {
             rect.left = Math.max(rect.left, density);
             rect.right = Math.min(rect.right, parent.getWidth() - density);
         }
+        c.drawRoundRect(rect, radius, radius, solidBase);
         c.drawRoundRect(rect, radius, radius, band);
         c.drawRoundRect(rect, radius, radius, edge);
     }
